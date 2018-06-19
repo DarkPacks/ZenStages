@@ -430,15 +430,15 @@ public class Stage {
             StagedOre stagedOre = stagedOreEntry.getValue();
             if (stagedOre.isNonDefaulting()) {
                 if (stagedOre.getBlockToShow() != null) {
-                    OreTiersCrT.addReplacement(getStage(), stagedOre.getBlockToHide(), stagedOre.getBlockToShow());
-                } else {
-                    OreTiersCrT.addReplacement(getStage(), stagedOre.getBlockToHide());
-                }
-            } else {
-                if (stagedOre.getBlockToShow() != null) {
                     OreTiersCrT.addNonDefaultingReplacement(getStage(), stagedOre.getBlockToHide(), stagedOre.getBlockToShow());
                 } else {
                     OreTiersCrT.addNonDefaultingReplacement(getStage(), stagedOre.getBlockToHide());
+                }
+            } else {
+                if (stagedOre.getBlockToShow() != null) {
+                    OreTiersCrT.addReplacement(getStage(), stagedOre.getBlockToHide(), stagedOre.getBlockToShow());
+                } else {
+                    OreTiersCrT.addReplacement(getStage(), stagedOre.getBlockToHide());
                 }
             }
         }
