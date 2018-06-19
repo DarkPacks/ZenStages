@@ -1,4 +1,4 @@
-package uk.artdude.zenstages.stager;
+package uk.artdude.zenstages.stager.wrappers;
 
 import crafttweaker.api.item.IIngredient;
 import stanhebben.zenscript.annotations.ZenClass;
@@ -8,8 +8,8 @@ public class StagedIngredient {
     private IIngredient ingredient;
     private boolean stageRecipe;
 
-    StagedIngredient(IIngredient ingredients, boolean stageRecipe) {
-        this.ingredient = ingredients;
+    public StagedIngredient(IIngredient ingredient, boolean stageRecipe) {
+        this.ingredient = ingredient;
         this.stageRecipe = stageRecipe;
     }
 
@@ -17,7 +17,7 @@ public class StagedIngredient {
         return ingredient;
     }
 
-    boolean shouldStageRecipe() {
+    public boolean shouldStageRecipe() {
         return stageRecipe;
     }
 }

@@ -1,17 +1,17 @@
 package uk.artdude.zenstages.stager;
 
 import com.blamejared.recipestages.handlers.Recipes;
-import com.teamacronymcoders.multiblockstages.MultiBlockStage;
-import com.teamacronymcoders.multiblockstages.MultiBlockStages;
 import com.teamacronymcoders.multiblockstages.immersiveengineering.IEMultiBlockStages;
 import crafttweaker.CraftTweakerAPI;
 import crafttweaker.annotations.ZenRegister;
 import crafttweaker.api.item.IIngredient;
+import crafttweaker.api.item.IItemStack;
 import crafttweaker.api.liquid.ILiquidStack;
 import crafttweaker.mc1120.oredict.MCOreDictEntry;
 import net.darkhax.dimstages.compat.crt.DimensionStagesCrT;
 import net.darkhax.itemstages.compat.crt.ItemStagesCrT;
 import net.darkhax.mobstages.compat.crt.MobStagesCrT;
+import net.darkhax.orestages.compat.crt.OreTiersCrT;
 import net.darkhax.tinkerstages.compat.crt.TinkerStagesCrT;
 import net.minecraftforge.fml.common.Optional.Method;
 import stanhebben.zenscript.annotations.Optional;
@@ -19,6 +19,10 @@ import stanhebben.zenscript.annotations.ZenClass;
 import stanhebben.zenscript.annotations.ZenGetter;
 import stanhebben.zenscript.annotations.ZenMethod;
 import uk.artdude.zenstages.common.util.Helper;
+import uk.artdude.zenstages.stager.wrappers.StagedIngredient;
+import uk.artdude.zenstages.stager.wrappers.StagedOre;
+import uk.artdude.zenstages.stager.wrappers.StagedType;
+import uk.artdude.zenstages.stager.wrappers.Types;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,6 +35,7 @@ import java.util.stream.Collectors;
 public class Stage {
     private String stage;
     private Map<IIngredient, StagedIngredient> stagedIngredients = new HashMap<>();
+    private Map<IIngredient, StagedOre> stagedOres = new HashMap<>();
     private List<StagedType> stagedTypes = new ArrayList<>();
 
     Stage(String stage) {
@@ -45,6 +50,11 @@ public class Stage {
     @ZenMethod
     public Map<IIngredient, StagedIngredient> getStagedIngredients() {
         return stagedIngredients;
+    }
+
+    @ZenMethod
+    public Map<IIngredient, StagedOre> getStagedOres() {
+        return stagedOres;
     }
 
     @ZenMethod
@@ -212,6 +222,7 @@ public class Stage {
 
     @ZenMethod
     @Method(modid = "recipestages")
+    @SuppressWarnings("UnusedReturnValue")
     public Stage addContainer(String container) {
         stageType(Types.CONTAINER, container);
 
@@ -220,6 +231,7 @@ public class Stage {
 
     @ZenMethod
     @Method(modid = "recipestages")
+    @SuppressWarnings("UnusedReturnValue")
     public Stage addPackage(String container) {
         stageType(Types.PACKAGE, container);
 
@@ -352,8 +364,35 @@ public class Stage {
     }
 
     @ZenMethod
+    @Method(modid = "orestages")
+    public Stage addOreReplacement(IIngredient blockToHide, @Optional(valueBoolean = false) boolean isNonDefaulting) {
+        // TODO: Handle if already added to Stage.
+        StagedOre stagedOre = new StagedOre(blockToHide);
+        stagedOre.setNonDefaulting(isNonDefaulting);
+
+        stagedOres.put(blockToHide, stagedOre);
+
+        return this;
+    }
+
+    @ZenMethod
+    @Method(modid = "orestages")
+    public Stage addOreReplacement(IIngredient blockToHide, IItemStack blockToShow, @Optional(valueBoolean = false) boolean isNonDefaulting) {
+        // TODO: Handle if already added to Stage.
+        StagedOre stagedOre = new StagedOre(blockToHide, blockToShow);
+        stagedOre.setNonDefaulting(isNonDefaulting);
+
+        stagedOres.put(blockToHide, stagedOre);
+
+        return this;
+    }
+
+    @ZenMethod
     @SuppressWarnings("UnusedReturnValue")
     public Stage build() {
+        /*
+            IIngredient Staging
+         */
         for (Map.Entry<IIngredient, StagedIngredient> stagedIngredient : stagedIngredients.entrySet()) {
             StagedIngredient ingredient = stagedIngredient.getValue();
             if (ingredient.getIngredient() instanceof ILiquidStack) {
@@ -366,6 +405,29 @@ public class Stage {
             }
         }
 
+        /*
+            Ore Staging
+         */
+        for (Map.Entry<IIngredient, StagedOre> stagedOreEntry : stagedOres.entrySet()) {
+            StagedOre stagedOre = stagedOreEntry.getValue();
+            if (stagedOre.isNonDefaulting()) {
+                if (stagedOre.getBlockToShow() != null) {
+                    OreTiersCrT.addReplacement(getStage(), stagedOre.getBlockToHide(), stagedOre.getBlockToShow());
+                } else {
+                    OreTiersCrT.addReplacement(getStage(), stagedOre.getBlockToHide());
+                }
+            } else {
+                if (stagedOre.getBlockToShow() != null) {
+                    OreTiersCrT.addNonDefaultingReplacement(getStage(), stagedOre.getBlockToHide(), stagedOre.getBlockToShow());
+                } else {
+                    OreTiersCrT.addNonDefaultingReplacement(getStage(), stagedOre.getBlockToHide());
+                }
+            }
+        }
+
+        /*
+            Custom Type Staging
+         */
         for (StagedType stagedType : stagedTypes) {
             switch (stagedType.getType()) {
                 case RECIPE_NAME:

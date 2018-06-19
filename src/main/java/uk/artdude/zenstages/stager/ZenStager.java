@@ -9,6 +9,8 @@ import net.minecraftforge.fml.common.Optional.Method;
 import stanhebben.zenscript.annotations.ZenClass;
 import stanhebben.zenscript.annotations.ZenMethod;
 import uk.artdude.zenstages.common.util.Helper;
+import uk.artdude.zenstages.stager.wrappers.StagedType;
+import uk.artdude.zenstages.stager.wrappers.Types;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -194,7 +196,7 @@ public class ZenStager {
                     if (currStage.getStage().equals(checkStage.getStage())) {
                         continue;
                     }
-                    Helper.getDuplicates(duplicateTypes, currStage.getStage(), currStage.getStagedTypes(type), checkStage.getStagedTypes(type));
+                    Helper.getTypeDuplicates(duplicateTypes, currStage.getStage(), currStage.getStagedTypes(type), checkStage.getStagedTypes(type));
                 }
             }
             duplicateTypes.forEach((dupedType, stages) -> CraftTweakerAPI.logError(String.format("[Stage Duplicate] Found a duplicate %s stage for `%s` for stages %s", type.name(), dupedType, stages)));
@@ -204,15 +206,18 @@ public class ZenStager {
             Handle duplication checking for Ingredient.
          */
         Map<IIngredient, List<String>> duplicateIngredient = new HashMap<>();
+        Map<IIngredient, List<String>> duplicateOreStage = new HashMap<>();
         for (Stage currStage : stageMap.values()) {
             for (Stage checkStage : stageMap.values()) {
                 if (currStage.getStage().equals(checkStage.getStage())) {
                     continue;
                 }
                 Helper.getIngredientDuplicates(duplicateIngredient, currStage.getStage(), currStage.getStagedIngredients(), checkStage.getStagedIngredients());
+                Helper.getOreDuplicates(duplicateOreStage, currStage.getStage(), currStage.getStagedOres(), checkStage.getStagedOres());
             }
         }
         duplicateIngredient.forEach((ingredient, stages) -> CraftTweakerAPI.logError(String.format("[Stage Duplicate] Found a duplicate ingredient stage for `%s` for stages %s", ingredient, stages)));
+        duplicateOreStage.forEach((ingredient, stages) -> CraftTweakerAPI.logError(String.format("[Stage Duplicate] Found a duplicate ore stage for `%s` for stages %s", ingredient, stages)));
 
         CraftTweakerAPI.logInfo("[Stage Duplicate] Completed duplicate checks!");
     }

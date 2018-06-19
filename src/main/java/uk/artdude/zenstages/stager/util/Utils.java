@@ -1,9 +1,10 @@
-package uk.artdude.zenstages.stager;
+package uk.artdude.zenstages.stager.util;
 
 import crafttweaker.annotations.ZenRegister;
 import org.apache.commons.lang3.StringUtils;
 import stanhebben.zenscript.annotations.ZenClass;
 import stanhebben.zenscript.annotations.ZenMethod;
+import uk.artdude.zenstages.stager.Stage;
 
 import java.util.UUID;
 

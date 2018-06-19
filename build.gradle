@@ -45,6 +45,8 @@ dependencies {
     deobfCompile "net.darkhax.mobstages:MobStages-1.12.2:2.0.+"
     // Tinker Stages
     deobfCompile "net.darkhax.tinkerstages:TinkerStages-1.12.2:2.0.+"
+    // Ore Stages
+    deobfCompile "net.darkhax.orestages:OreStages-1.12.2:2.0.+"
     // BookShelf
     deobfCompile "net.darkhax.bookshelf:Bookshelf-1.12.2:2.3.+"
 }
@@ -58,7 +60,7 @@ repositories {
     maven {
         url 'http://dvs1.progwml6.com/files/maven'
     }
-    // GameStages, ItemStages, DimensionStages, MobStages, TinkerStages
+    // GameStages, ItemStages, DimensionStages, MobStages, TinkerStages, OreStages
     maven {
         url 'https://maven.mcmoddev.com'
     }
