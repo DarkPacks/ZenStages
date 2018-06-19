@@ -366,7 +366,16 @@ public class Stage {
     @ZenMethod
     @Method(modid = "orestages")
     public Stage addOreReplacement(IIngredient blockToHide, @Optional(valueBoolean = false) boolean isNonDefaulting) {
-        // TODO: Handle if already added to Stage.
+        if (blockToHide == null) {
+            CraftTweakerAPI.logError(String.format("[Stage %s] Ore can not be null!", this.getStage()));
+
+            return this;
+        }
+        if (stagedOres.containsKey(blockToHide)) {
+            CraftTweakerAPI.logError(String.format("[Stage %s] Failed to add the ore `%s` due to already being added.", this.getStage(), blockToHide.toString()));
+
+            return this;
+        }
         StagedOre stagedOre = new StagedOre(blockToHide);
         stagedOre.setNonDefaulting(isNonDefaulting);
 
@@ -378,7 +387,16 @@ public class Stage {
     @ZenMethod
     @Method(modid = "orestages")
     public Stage addOreReplacement(IIngredient blockToHide, IItemStack blockToShow, @Optional(valueBoolean = false) boolean isNonDefaulting) {
-        // TODO: Handle if already added to Stage.
+        if (blockToHide == null || blockToShow == null) {
+            CraftTweakerAPI.logError(String.format("[Stage %s] Ore can not be null!", this.getStage()));
+
+            return this;
+        }
+        if (stagedOres.containsKey(blockToHide)) {
+            CraftTweakerAPI.logError(String.format("[Stage %s] Failed to add the ore `%s` due to already being added.", this.getStage(), blockToHide.toString()));
+
+            return this;
+        }
         StagedOre stagedOre = new StagedOre(blockToHide, blockToShow);
         stagedOre.setNonDefaulting(isNonDefaulting);
 
