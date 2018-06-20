@@ -164,6 +164,18 @@ public class ZenStager {
     }
 
     @ZenMethod
+    @Method(modid = "tinkerstages")
+    public static Stage getTiCToolStage(String toolName) {
+        for (Stage stage : stageMap.values()) {
+            if (stage.getTiCToolStage(toolName) != null) {
+                return stage;
+            }
+        }
+
+        return null;
+    }
+
+    @ZenMethod
     public static boolean isStaged(IIngredient ingredient) {
         return getIngredientStage(ingredient) != null;
     }

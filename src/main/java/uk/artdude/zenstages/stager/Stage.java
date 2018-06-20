@@ -75,8 +75,7 @@ public class Stage {
         return stackList;
     }
 
-    @ZenMethod
-    public Stage getIngredientStage(IIngredient testIngredient) {
+    private Stage getIngredientStage(IIngredient testIngredient) {
         for (Map.Entry<IIngredient, StagedIngredient> stagedIngredientEntry : stagedIngredients.entrySet()) {
             IIngredient ingredient = stagedIngredientEntry.getValue().getIngredient();
 
@@ -102,43 +101,35 @@ public class Stage {
         return null;
     }
 
-    @ZenMethod
-    public Stage getContainerStage(String container) {
+    private Stage getContainerStage(String container) {
         return getStageFromType(Types.CONTAINER, container);
     }
 
-    @ZenMethod
-    public Stage getRecipeNameStage(String recipeName) {
+    Stage getRecipeNameStage(String recipeName) {
         return getStageFromType(Types.RECIPE_NAME, recipeName);
     }
 
-    @ZenMethod
-    public Stage getDimensionStage(int dimension) {
+    Stage getDimensionStage(int dimension) {
         return getStageFromType(Types.DIMENSION, Integer.toString(dimension));
     }
 
-    @ZenMethod
-    public Stage getMobStage(String mobName) {
+    Stage getMobStage(String mobName) {
         return getStageFromType(Types.MOB, mobName);
     }
 
-    @ZenMethod
-    public Stage getTiCMaterialStage(String material) {
+    Stage getTiCMaterialStage(String material) {
         return getStageFromType(Types.TINKER_MATERIAL, material);
     }
 
-    @ZenMethod
-    public Stage getTiCToolStage(String toolName) {
+    Stage getTiCToolStage(String toolName) {
         return getStageFromType(Types.TINKER_TOOL, toolName);
     }
 
-    @ZenMethod
-    public boolean isStaged(IIngredient ingredient) {
+    boolean isStaged(IIngredient ingredient) {
         return this.getIngredientStage(ingredient) != null;
     }
 
-    @ZenMethod
-    public boolean isStaged(String name) {
+    boolean isStaged(String name) {
         if (this.getContainerStage(name) != null) {
             return true;
         }
@@ -164,9 +155,8 @@ public class Stage {
         return this.getRecipeNameStage(name) != null;
     }
 
-    @ZenMethod
     @Method(modid = "dimstages")
-    public boolean isStaged(int dimension) {
+    boolean isStaged(int dimension) {
         return this.getDimensionStage(dimension) != null;
     }
 
@@ -220,19 +210,17 @@ public class Stage {
         return this;
     }
 
-    @ZenMethod
     @Method(modid = "recipestages")
     @SuppressWarnings("UnusedReturnValue")
-    public Stage addContainer(String container) {
+    Stage addContainer(String container) {
         stageType(Types.CONTAINER, container);
 
         return this;
     }
 
-    @ZenMethod
     @Method(modid = "recipestages")
     @SuppressWarnings("UnusedReturnValue")
-    public Stage addPackage(String container) {
+    Stage addPackage(String container) {
         stageType(Types.PACKAGE, container);
 
         return this;
@@ -260,6 +248,7 @@ public class Stage {
         return this;
     }
 
+    // TODO: Add IEntity support?
     @ZenMethod
     @Method(modid = "mobstages")
     public Stage addMobs(String[] mobNames) {

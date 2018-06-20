@@ -1,9 +1,12 @@
 package uk.artdude.zenstages.stager.wrappers;
 
+import crafttweaker.annotations.ZenRegister;
 import crafttweaker.api.item.IIngredient;
 import stanhebben.zenscript.annotations.ZenClass;
+import stanhebben.zenscript.annotations.ZenMethod;
 
-@ZenClass("mods.zenstages.StagedIngredient")
+@ZenRegister
+@ZenClass("mods.zenstages.wrappers.StagedIngredient")
 public class StagedIngredient {
     private IIngredient ingredient;
     private boolean stageRecipe;
@@ -13,10 +16,12 @@ public class StagedIngredient {
         this.stageRecipe = stageRecipe;
     }
 
+    @ZenMethod("ingredient")
     public IIngredient getIngredient() {
         return ingredient;
     }
 
+    @ZenMethod("shouldStage")
     public boolean shouldStageRecipe() {
         return stageRecipe;
     }

@@ -1,8 +1,13 @@
 package uk.artdude.zenstages.stager.wrappers;
 
+import crafttweaker.annotations.ZenRegister;
 import crafttweaker.api.item.IIngredient;
 import crafttweaker.api.item.IItemStack;
+import stanhebben.zenscript.annotations.ZenClass;
+import stanhebben.zenscript.annotations.ZenMethod;
 
+@ZenRegister
+@ZenClass("mods.zenstages.wrappers.StagedOre")
 public class StagedOre {
     private IIngredient blockToHide;
     private IItemStack blockToShow = null;
@@ -21,14 +26,17 @@ public class StagedOre {
         isNonDefaulting = nonDefaulting;
     }
 
+    @ZenMethod("blockToHide")
     public IIngredient getBlockToHide() {
         return blockToHide;
     }
 
+    @ZenMethod("blockToShow")
     public IItemStack getBlockToShow() {
         return blockToShow;
     }
 
+    @ZenMethod("nonDefaulting")
     public boolean isNonDefaulting() {
         return isNonDefaulting;
     }

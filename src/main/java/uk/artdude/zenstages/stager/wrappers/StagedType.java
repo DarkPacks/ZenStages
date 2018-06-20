@@ -1,8 +1,11 @@
 package uk.artdude.zenstages.stager.wrappers;
 
+import crafttweaker.annotations.ZenRegister;
 import stanhebben.zenscript.annotations.ZenClass;
+import stanhebben.zenscript.annotations.ZenMethod;
 
-@ZenClass("mods.zenstages.StagedType")
+@ZenRegister
+@ZenClass("mods.zenstages.wrappers.StagedType")
 public class StagedType {
     private String value;
     private String subValue;
@@ -14,12 +17,19 @@ public class StagedType {
         this.subValue = subValue;
     }
 
+    @ZenMethod("value")
     public String getValue() {
-        return value;
+        return this.value;
     }
 
+    @ZenMethod("subValue")
     public String getSubValue() {
-        return subValue;
+        return this.subValue;
+    }
+
+    @ZenMethod("typeName")
+    public String getTypeName() {
+        return type.name();
     }
 
     public Types getType() {
