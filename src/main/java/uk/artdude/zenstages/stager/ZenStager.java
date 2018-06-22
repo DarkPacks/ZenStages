@@ -43,14 +43,14 @@ public class ZenStager {
     }
 
     @ZenMethod
-    public void addPackage(String packageName, Stage[] stages) {
+    public static void addPackage(String packageName, Stage[] stages) {
         for (Stage stage : stages) {
             stage.addPackage(packageName);
         }
     }
 
     @ZenMethod
-    public void addContainer(String containerName, Stage[] stages) {
+    public static void addContainer(String containerName, Stage[] stages) {
         for (Stage stage : stages) {
             stage.addContainer(containerName);
         }
