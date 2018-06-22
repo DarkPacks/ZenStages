@@ -181,6 +181,11 @@ public class Stage {
     @ZenMethod
     @SuppressWarnings("UnusedReturnValue")
     public Stage addIngredients(IIngredient[] ingredients, @Optional(valueBoolean = true) boolean recipeStage) {
+        if (ingredients == null) {
+            CraftTweakerAPI.logError(String.format("[Stage %s] Ingredients can not be null!", this.getStage()));
+
+            return this;
+        }
         for (IIngredient ingredient : ingredients) {
             addIngredient(ingredient, recipeStage);
         }
@@ -442,6 +447,7 @@ public class Stage {
                     break;
                 case RECIPE_REGEX:
                     Recipes.setRecipeStageByRegex(getStage(), stagedType.getValue());
+                    break;
                 case DIMENSION:
                     DimensionStagesCrT.addDimensionStage(getStage(), Integer.parseInt(stagedType.getValue()));
                     break;
