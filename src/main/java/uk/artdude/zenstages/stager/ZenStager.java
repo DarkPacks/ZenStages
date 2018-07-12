@@ -5,22 +5,24 @@ import crafttweaker.CraftTweakerAPI;
 import crafttweaker.annotations.ZenRegister;
 import crafttweaker.api.item.IIngredient;
 import crafttweaker.api.liquid.ILiquidStack;
-import net.minecraftforge.fml.common.Optional.Method;
 import stanhebben.zenscript.annotations.ZenClass;
 import stanhebben.zenscript.annotations.ZenMethod;
-import uk.artdude.zenstages.common.util.Helper;
-import uk.artdude.zenstages.stager.wrappers.StagedType;
-import uk.artdude.zenstages.stager.wrappers.Types;
+import uk.artdude.zenstages.stager.type.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @ZenRegister
 @ZenClass("mods.zenstages.ZenStager")
 public class ZenStager {
     private static Map<String, Stage> stageMap = new HashMap<>();
+    private static List<TypeCustom> customTypes = new ArrayList<>();
+
+    /*
+        List used to Store Overrides set when making an Override Type. This List is used on the Builder for the Mod Type
+        to prevent staging of that IIngredient.
+    */
+    public static List<IIngredient> stagingOverrides = new ArrayList<>();
 
     @ZenMethod
     public static Stage initStage(String name) {
@@ -40,6 +42,42 @@ public class ZenStager {
         stageMap.put(name, stage);
 
         return stage;
+    }
+
+    /**
+     * Custom Types are used when the designer wants to use Custom Types for things such as events using
+     * CraftTweaker/ZenEvents to name one example.
+     * <p>
+     * This is a new idea and would be built upon after time as needs change for the idea.
+     */
+    @ZenMethod
+    public static TypeCustom initCustomType(String name, String value) {
+        return createCustomType(name, value);
+    }
+
+    @ZenMethod
+    public static TypeCustom initCustomType(String name, String[] value) {
+        return createCustomType(name, value);
+    }
+
+    @ZenMethod
+    public static TypeCustom initCustomType(String name, int value) {
+        return createCustomType(name, value);
+    }
+
+    @ZenMethod
+    public static TypeCustom initCustomType(String name, int[] value) {
+        return createCustomType(name, value);
+    }
+
+    @ZenMethod
+    public static TypeCustom initCustomType(String name, IIngredient value) {
+        return createCustomType(name, value);
+    }
+
+    @ZenMethod
+    public static TypeCustom initCustomType(String name, IIngredient[] value) {
+        return createCustomType(name, value);
     }
 
     @ZenMethod
@@ -63,7 +101,7 @@ public class ZenStager {
 
     @ZenMethod
     public static Stage getStage(String stage) {
-        return stageMap.get(stage);
+        return stageMap.get(stage.toLowerCase());
     }
 
     @ZenMethod
@@ -73,7 +111,7 @@ public class ZenStager {
         }
 
         for (Stage stage : stageMap.values()) {
-            if (stage.isStaged(ingredient)) {
+            if (stage.isIngredientStaged(ingredient)) {
                 return stage;
             }
         }
@@ -104,7 +142,6 @@ public class ZenStager {
     }
 
     @ZenMethod
-    @Method(modid = "recipestages")
     public static Stage getRecipeNameStage(String recipeName) {
         for (Stage stage : stageMap.values()) {
             if (stage.getRecipeNameStage(recipeName) != null) {
@@ -116,7 +153,6 @@ public class ZenStager {
     }
 
     @ZenMethod
-    @Method(modid = "dimstages")
     public static Stage getDimensionStage(int dimension) {
         for (Stage stage : stageMap.values()) {
             if (stage.getDimensionStage(dimension) != null) {
@@ -128,19 +164,32 @@ public class ZenStager {
     }
 
     @ZenMethod
-    @Method(modid = "recipestages")
     public static List<Stage> getContainerStages(String container) {
-        return getTypeStages(Types.CONTAINER, container);
+        Map<String, List<String>> stagesForType = new HashMap<>();
+        getStagesForType(TypeContainer.class, stagesForType);
+
+        List<String> stages = stagesForType.get(container);
+        if (stages == null) {
+            return null;
+        }
+
+        return stages.stream().map(t -> stageMap.get(t)).collect(Collectors.toList());
     }
 
     @ZenMethod
-    @Method(modid = "recipestages")
     public static List<Stage> getPackageStages(String packageName) {
-        return getTypeStages(Types.PACKAGE, packageName);
+        Map<String, List<String>> stagesForType = new HashMap<>();
+        getStagesForType(TypePackage.class, stagesForType);
+
+        List<String> stages = stagesForType.get(packageName);
+        if (stages == null) {
+            return null;
+        }
+
+        return stages.stream().map(t -> stageMap.get(t)).collect(Collectors.toList());
     }
 
     @ZenMethod
-    @Method(modid = "mobstages")
     public static Stage getMobStage(String mobName) {
         for (Stage stage : stageMap.values()) {
             if (stage.getMobStage(mobName) != null) {
@@ -152,7 +201,6 @@ public class ZenStager {
     }
 
     @ZenMethod
-    @Method(modid = "tinkerstages")
     public static Stage getTiCMaterialStage(String material) {
         for (Stage stage : stageMap.values()) {
             if (stage.getTiCMaterialStage(material) != null) {
@@ -164,7 +212,6 @@ public class ZenStager {
     }
 
     @ZenMethod
-    @Method(modid = "tinkerstages")
     public static Stage getTiCToolStage(String toolName) {
         for (Stage stage : stageMap.values()) {
             if (stage.getTiCToolStage(toolName) != null) {
@@ -176,79 +223,92 @@ public class ZenStager {
     }
 
     @ZenMethod
-    public static boolean isStaged(IIngredient ingredient) {
-        return getIngredientStage(ingredient) != null;
+    public static Stage getCustomStage(String slug, String value) {
+        return getCustomTypeStage(slug, value);
     }
 
     @ZenMethod
-    public static boolean isStaged(String string) {
-        return getTypeStage(string) != null;
+    public static Stage getCustomStage(String slug, int value) {
+        return getCustomTypeStage(slug, value);
     }
 
     @ZenMethod
-    @Method(modid = "dimstages")
-    public static boolean isStaged(int dimension) {
-        return getDimensionStage(dimension) != null;
+    public static Stage getCustomStage(String slug, IIngredient value) {
+        return getCustomTypeStage(slug, value);
+    }
+
+    @ZenMethod
+    public static boolean isStaged(String slug, String value) {
+        switch (slug.toLowerCase()) {
+            case "container":
+                return getStageForType(TypeContainer.class, value) != null;
+            case "mod":
+                return getStageForType(TypeMod.class, value) != null;
+            case "multiblock":
+                return getStageForType(TypeMultiBlock.class, value) != null;
+            case "pkg":
+            case "package":
+                return getStageForType(TypePackage.class, value) != null;
+            case "recipename":
+                return getStageForType(TypeRecipeName.class, value) != null;
+            case "tinker":
+                return getStageForType(TypeTinker.class, value) != null;
+        }
+
+        return hasCustomType(slug, value);
+    }
+
+    @ZenMethod
+    public static boolean isStaged(String slug, int value) {
+        switch (slug.toLowerCase()) {
+            case "dim":
+            case "dimension":
+                return getStageForType(TypeDimension.class, value) != null;
+        }
+
+        return hasCustomType(slug, value);
+    }
+
+    @ZenMethod
+    public static boolean isStaged(String slug, IIngredient value) {
+        switch (slug.toLowerCase()) {
+            case "ing":
+            case "ingredient":
+                return getStageForType(TypeIngredient.class, value) != null;
+            case "ore":
+                return getStageForType(TypeOre.class, value) != null;
+        }
+
+        return hasCustomType(slug, value);
     }
 
     @ZenMethod
     public static void checkConflicts() {
         CraftTweakerAPI.logInfo("[Stage Duplicate] Starting duplicate checks....");
 
-        /*
-          Handle checking for duplicates on Types which are supported for duplication checking.
-         */
-        for (Types type : Types.values()) {
-            if (!type.canDupeCheck()) {
-                continue;
-            }
-            Map<String, List<String>> duplicateTypes = new HashMap<>();
-            for (Stage currStage : stageMap.values()) {
-                for (Stage checkStage : stageMap.values()) {
-                    if (currStage.getStage().equals(checkStage.getStage())) {
-                        continue;
-                    }
-                    Helper.getTypeDuplicates(duplicateTypes, currStage.getStage(), currStage.getStagedTypes(type), checkStage.getStagedTypes(type));
-                }
-            }
-            duplicateTypes.forEach((dupedType, stages) -> CraftTweakerAPI.logError(String.format("[Stage Duplicate] Found a duplicate %s stage for `%s` for stages %s", type.name(), dupedType, stages)));
-        }
-
-        /*
-            Handle duplication checking for Ingredient.
-         */
-        Map<IIngredient, List<String>> duplicateIngredient = new HashMap<>();
-        Map<IIngredient, List<String>> duplicateOreStage = new HashMap<>();
-        for (Stage currStage : stageMap.values()) {
-            for (Stage checkStage : stageMap.values()) {
-                if (currStage.getStage().equals(checkStage.getStage())) {
-                    continue;
-                }
-                Helper.getIngredientDuplicates(duplicateIngredient, currStage.getStage(), currStage.getStagedIngredients(), checkStage.getStagedIngredients());
-                Helper.getOreDuplicates(duplicateOreStage, currStage.getStage(), currStage.getStagedOres(), checkStage.getStagedOres());
-            }
-        }
-        duplicateIngredient.forEach((ingredient, stages) -> CraftTweakerAPI.logError(String.format("[Stage Duplicate] Found a duplicate ingredient stage for `%s` for stages %s", ingredient, stages)));
-        duplicateOreStage.forEach((ingredient, stages) -> CraftTweakerAPI.logError(String.format("[Stage Duplicate] Found a duplicate ore stage for `%s` for stages %s", ingredient, stages)));
+        DupeChecker.checkForDupes(stageMap);
+        DupeChecker.logDupes();
 
         CraftTweakerAPI.logInfo("[Stage Duplicate] Completed duplicate checks!");
     }
 
     @ZenMethod
     public static void buildAll() {
-        Map<Types, Map<String, List<String>>> stagedTypes = new HashMap<>();
-        stagedTypes.put(Types.CONTAINER, new HashMap<>());
-        stagedTypes.put(Types.PACKAGE, new HashMap<>());
+        CraftTweakerAPI.logInfo(String.format("[ZenStager] Starting build for %s stages...", stageMap.size()));
+
+        Map<String, Map<String, List<String>>> stagedTypes = new HashMap<>();
+        stagedTypes.put("CONTAINER", new HashMap<>());
+        stagedTypes.put("PACKAGE", new HashMap<>());
 
         stageMap.forEach((s, stage) -> {
-            getStagedTypes(Types.CONTAINER, stagedTypes.get(Types.CONTAINER), stage);
-            getStagedTypes(Types.PACKAGE, stagedTypes.get(Types.PACKAGE), stage);
+            getStagesForType(TypeContainer.class, stagedTypes.get("CONTAINER"), stage);
+            getStagesForType(TypePackage.class, stagedTypes.get("PACKAGE"), stage);
 
             stage.build();
         });
 
         // Stage the Containers based on the built stage mapping.
-        Map<String, List<String>> stagedContainers = stagedTypes.get(Types.CONTAINER);
+        Map<String, List<String>> stagedContainers = stagedTypes.get("CONTAINER");
         stagedContainers.forEach((container, stages) -> {
             String[] forStages = new String[]{};
             forStages = stages.toArray(forStages);
@@ -257,61 +317,105 @@ public class ZenStager {
         });
 
         // Stage the Packages based on the built stage mapping.
-        Map<String, List<String>> stagedPackages = stagedTypes.get(Types.PACKAGE);
+        Map<String, List<String>> stagedPackages = stagedTypes.get("PACKAGE");
         stagedPackages.forEach((packageName, stages) -> {
             String[] forStages = new String[]{};
             forStages = stages.toArray(forStages);
 
             Recipes.setPackageStage(packageName, forStages);
         });
+
+        CraftTweakerAPI.logInfo(String.format("[ZenStager] Completed build for %s stages!", stageMap.size()));
     }
 
     /**
-     * Update a passed Map of the staged types to another Map listing which contains that type
-     * and a String List of the stages which are for that Staged Type.
+     * Create a Custom Type based on the Args provided.
      */
-    private static void getStagedTypes(Types type, Map<String, List<String>> stringListMap, Stage stage) {
-        for (StagedType stagedType : stage.getStagedTypes(type)) {
-            if (stringListMap.containsKey(stagedType.getValue())) {
-                List<String> currentStages = stringListMap.get(stagedType.getValue());
-                currentStages.add(stage.getStage());
-            } else {
-                List<String> stages = new ArrayList<>();
-                stages.add(stage.getStage());
-                stringListMap.put(stagedType.getValue(), stages);
-            }
-        }
+    private static <T> TypeCustom createCustomType(String name, T value) {
+        TypeCustom<T> customType = new TypeCustom<>(name, value);
+        customTypes.add(customType);
+
+        return customType;
     }
 
-    private static String getTypeStage(String value) {
-        if (value == null || value.length() < 1) {
-            return null;
-        }
-
-        for (Stage stage : stageMap.values()) {
-            if (stage.isStaged(value)) {
-                return stage.getStage();
+    /**
+     * Get the Stage in which a Custom Type was Staged too.
+     */
+    @SuppressWarnings("unchecked")
+    private static <T> Stage getCustomTypeStage(String slug, T value) {
+        List<TypeCustom> customTypes = filterCustomByName(slug);
+        for (TypeCustom customType : customTypes) {
+            if (customType != null && customType.getStage() != null) {
+                if (customType.getValue() instanceof IIngredient[] && Arrays.asList((T[]) customType.getValue()).contains(value)) {
+                    return customType.getStage();
+                } else if (customType.getValue().equals(value)) {
+                    return customType.getStage();
+                }
             }
         }
 
         return null;
     }
 
-    private static List<Stage> getTypeStages(Types type, String value) {
-        List<Stage> stages = new ArrayList<>();
-        if (value == null || value.length() < 1) {
-            return null;
-        }
-
-        for (Stage stage : stageMap.values()) {
-            List<StagedType> stagedTypes = stage.getStagedTypes(type);
-            for (StagedType stagedType : stagedTypes) {
-                if (stagedType.getValue().equalsIgnoreCase(value)) {
-                    stages.add(stage);
-                }
+    @SuppressWarnings("unchecked")
+    private static <T> boolean hasCustomType(String slug, T value) {
+        List<TypeCustom> customTypes = filterCustomByName(slug);
+        for (TypeCustom customType : customTypes) {
+            if (customType.getValue() instanceof IIngredient[] && Arrays.asList((T[]) customType.getValue()).contains(value)) {
+                return true;
+            } else if (customType.getValue().equals(value)) {
+                return true;
             }
         }
 
-        return stages;
+        return false;
+    }
+
+    static List<TypeCustom> filterCustomByStage(Stage stage, String slug) {
+        return customTypes.stream()
+                .filter(t -> t.getStage() == stage)
+                .collect(Collectors.toList()).stream()
+                .filter(k -> k.getName().equalsIgnoreCase(slug))
+                .collect(Collectors.toList());
+    }
+
+    static List<TypeCustom> filterCustomByName(String name) {
+        return customTypes.stream().filter(t -> t.getName().equalsIgnoreCase(name)).collect(Collectors.toList());
+    }
+
+    /**
+     * Update a passed Map of the staged types to another Map listing which contains that type
+     * and a String List of the stages which are for that Staged Type.
+     */
+    @SuppressWarnings("SuspiciousMethodCalls")
+    private static <T extends TypeBase> void getStagesForType(Class<T> clazz, Map<String, List<String>> stringListMap) {
+        stageMap.forEach((s, stage) -> getStagesForType(clazz, stringListMap, stage));
+    }
+
+    @SuppressWarnings("SuspiciousMethodCalls")
+    private static <T extends TypeBase> void getStagesForType(Class<T> clazz, Map<String, List<String>> stringListMap, Stage stage) {
+        for (T stagedType : stage.filterEntries(clazz)) {
+            if (stringListMap.containsKey(stagedType.getValue())) {
+                List<String> currentStages = stringListMap.get(stagedType.getValue());
+                currentStages.add(stage.getStage());
+            } else {
+                List<String> stages = new ArrayList<>();
+                stages.add(stage.getStage());
+                stringListMap.put(stagedType.getValue().toString(), stages);
+            }
+        }
+    }
+
+    /**
+     * Return the Stage in which the value is set in. Otherwise returns Null.
+     */
+    private static <T extends TypeBase, J> Stage getStageForType(Class<T> clazz, J value) {
+        for (Stage stage : stageMap.values()) {
+            if (stage.getStage(clazz, value) != null) {
+                return stage;
+            }
+        }
+
+        return null;
     }
 }

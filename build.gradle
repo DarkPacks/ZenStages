@@ -32,9 +32,11 @@ minecraft {
 
 dependencies {
     // CraftTweaker
-    deobfCompile "CraftTweaker2:CraftTweaker2-MC1120-Main:1.12-4.1.8.476"
+    deobfCompile "CraftTweaker2:CraftTweaker2-MC1120-Main:1.12-4.1.+"
     // JEI
     deobfCompile "mezz.jei:jei_1.12.2:4.9.1.187"
+    // BookShelf
+    deobfCompile "net.darkhax.bookshelf:Bookshelf-1.12.2:2.3.552:deobf"
     // GameStages
     deobfCompile "net.darkhax.gamestages:GameStages-1.12.2:2.0.91:deobf"
     // ItemStages

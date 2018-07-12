@@ -1,42 +1,31 @@
 package uk.artdude.zenstages.stager;
 
-import com.blamejared.recipestages.handlers.Recipes;
-import com.teamacronymcoders.multiblockstages.immersiveengineering.IEMultiBlockStages;
 import crafttweaker.CraftTweakerAPI;
 import crafttweaker.annotations.ZenRegister;
 import crafttweaker.api.item.IIngredient;
 import crafttweaker.api.item.IItemStack;
 import crafttweaker.api.liquid.ILiquidStack;
 import crafttweaker.mc1120.oredict.MCOreDictEntry;
-import net.darkhax.dimstages.compat.crt.DimensionStagesCrT;
-import net.darkhax.itemstages.compat.crt.ItemStagesCrT;
-import net.darkhax.mobstages.compat.crt.MobStagesCrT;
-import net.darkhax.orestages.compat.crt.OreTiersCrT;
-import net.darkhax.tinkerstages.compat.crt.TinkerStagesCrT;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Optional.Method;
 import stanhebben.zenscript.annotations.Optional;
 import stanhebben.zenscript.annotations.ZenClass;
 import stanhebben.zenscript.annotations.ZenGetter;
 import stanhebben.zenscript.annotations.ZenMethod;
 import uk.artdude.zenstages.common.util.Helper;
-import uk.artdude.zenstages.stager.wrappers.StagedIngredient;
-import uk.artdude.zenstages.stager.wrappers.StagedOre;
-import uk.artdude.zenstages.stager.wrappers.StagedType;
-import uk.artdude.zenstages.stager.wrappers.Types;
+import uk.artdude.zenstages.stager.type.*;
+import uk.artdude.zenstages.stager.type.enums.MultiBlockType;
+import uk.artdude.zenstages.stager.type.enums.TinkerType;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @ZenRegister
 @ZenClass("mods.zenstages.Stage")
 public class Stage {
     private String stage;
-    private Map<IIngredient, StagedIngredient> stagedIngredients = new HashMap<>();
-    private Map<IIngredient, StagedOre> stagedOres = new HashMap<>();
-    private List<StagedType> stagedTypes = new ArrayList<>();
+    private List<TypeBase> stagedEntries = new ArrayList<>();
 
     Stage(String stage) {
         this.stage = stage;
@@ -47,133 +36,58 @@ public class Stage {
         return stage;
     }
 
-    @ZenMethod
-    public Map<IIngredient, StagedIngredient> getStagedIngredients() {
-        return stagedIngredients;
-    }
-
-    @ZenMethod
-    public Map<IIngredient, StagedOre> getStagedOres() {
-        return stagedOres;
-    }
-
-    @ZenMethod
-    public List<StagedType> getStagedTypes() {
-        return stagedTypes;
-    }
-
-    @ZenMethod
-    public List<ILiquidStack> getStagedLiquids() {
+    List<ILiquidStack> getStagedLiquids() {
+        List<TypeIngredient> stagedIngredients = filterEntries(TypeIngredient.class);
         List<ILiquidStack> stackList = new ArrayList<>();
-        for (Map.Entry<IIngredient, StagedIngredient> stagedIngredientEntry : stagedIngredients.entrySet()) {
-            StagedIngredient ingredient = stagedIngredientEntry.getValue();
-            if (ingredient.getIngredient() instanceof ILiquidStack) {
-                stackList.add((ILiquidStack) ingredient.getIngredient());
+
+        for (TypeIngredient stagedIngredientEntry : stagedIngredients) {
+            IIngredient ingredient = stagedIngredientEntry.getValue();
+            if (ingredient instanceof ILiquidStack) {
+                stackList.add((ILiquidStack) ingredient);
             }
         }
 
         return stackList;
     }
 
-    private Stage getIngredientStage(IIngredient testIngredient) {
-        for (Map.Entry<IIngredient, StagedIngredient> stagedIngredientEntry : stagedIngredients.entrySet()) {
-            IIngredient ingredient = stagedIngredientEntry.getValue().getIngredient();
-
-            if (testIngredient instanceof MCOreDictEntry) {
-                if (ingredient instanceof MCOreDictEntry) {
-                    if (((MCOreDictEntry) testIngredient).getName().equals(((MCOreDictEntry) ingredient).getName())) {
-                        return this;
-                    }
-                }
-            } else if (ingredient instanceof MCOreDictEntry) {
-                if (ingredient.contains(testIngredient)) {
-                    return this;
-                }
-            } else if (testIngredient instanceof ILiquidStack) {
-                if (ingredient.matches((ILiquidStack) testIngredient)) {
-                    return this;
-                }
-            } else if (ingredient.contains(testIngredient)) {
-                return this;
-            }
-        }
-
-        return null;
-    }
-
-    private Stage getContainerStage(String container) {
-        return getStageFromType(Types.CONTAINER, container);
-    }
-
     Stage getRecipeNameStage(String recipeName) {
-        return getStageFromType(Types.RECIPE_NAME, recipeName);
+        return getStage(TypeRecipeName.class, recipeName);
     }
 
     Stage getDimensionStage(int dimension) {
-        return getStageFromType(Types.DIMENSION, Integer.toString(dimension));
+        return getStage(TypeDimension.class, dimension);
     }
 
     Stage getMobStage(String mobName) {
-        return getStageFromType(Types.MOB, mobName);
+        return getStage(TypeMob.class, mobName);
     }
 
     Stage getTiCMaterialStage(String material) {
-        return getStageFromType(Types.TINKER_MATERIAL, material);
+        return getStage(TypeTinker.class, material);
     }
 
     Stage getTiCToolStage(String toolName) {
-        return getStageFromType(Types.TINKER_TOOL, toolName);
+        return getStage(TypeTinker.class, toolName);
     }
 
-    boolean isStaged(IIngredient ingredient) {
+    boolean isIngredientStaged(IIngredient ingredient) {
         return this.getIngredientStage(ingredient) != null;
     }
 
-    boolean isStaged(String name) {
-        if (this.getContainerStage(name) != null) {
-            return true;
-        }
-
-        if (this.getMobStage(name) != null) {
-            return true;
-        }
-
-        if (this.getTiCMaterialStage(name) != null) {
-            return true;
-        }
-
-        if (this.getTiCToolStage(name) != null) {
-            return true;
-        }
-
-        if (Helper.validateRecipeName(name) == null) {
-            CraftTweakerAPI.logError(String.format("[Stage %s] Recipe name `%s` is not valid! Example: minecraft:boat", this.getStage(), name));
-
-            return false;
-        }
-
-        return this.getRecipeNameStage(name) != null;
-    }
-
-    @Method(modid = "dimstages")
-    boolean isStaged(int dimension) {
-        return this.getDimensionStage(dimension) != null;
+    @ZenMethod
+    public boolean isCustomStaged(String slug, String value) {
+        return Helper.getCustomTypeByValue(ZenStager.filterCustomByStage(this, slug), value) != null;
     }
 
     @ZenMethod
     @SuppressWarnings("UnusedReturnValue")
     public Stage addIngredient(IIngredient ingredient, @Optional(valueBoolean = true) boolean recipeStage) {
         if (ingredient == null) {
-            CraftTweakerAPI.logError(String.format("[Stage %s] Ingredient can not be null!", this.getStage()));
+            CraftTweakerAPI.logError(String.format("[Stage %s] Ingredient can not be null!", getStage()));
 
             return this;
         }
-        if (stagedIngredients.containsKey(ingredient)) {
-            CraftTweakerAPI.logError(String.format("[Stage %s] Failed to add the ingredient `%s` due to already being added.", this.getStage(), ingredient.toString()));
-
-            return this;
-        }
-        stagedIngredients.put(ingredient, new StagedIngredient(ingredient, recipeStage));
+        this.stagedEntries.add(new TypeIngredient(ingredient, recipeStage));
 
         return this;
     }
@@ -182,12 +96,48 @@ public class Stage {
     @SuppressWarnings("UnusedReturnValue")
     public Stage addIngredients(IIngredient[] ingredients, @Optional(valueBoolean = true) boolean recipeStage) {
         if (ingredients == null) {
-            CraftTweakerAPI.logError(String.format("[Stage %s] Ingredients can not be null!", this.getStage()));
+            CraftTweakerAPI.logError(String.format("[Stage %s] Ingredients can not be null!", getStage()));
 
             return this;
         }
         for (IIngredient ingredient : ingredients) {
             addIngredient(ingredient, recipeStage);
+        }
+
+        return this;
+    }
+
+    @ZenMethod
+    public Stage addIngredientOverride(IIngredient ingredient, @Optional(valueBoolean = true) boolean recipeStage) {
+        if (ingredient == null) {
+            CraftTweakerAPI.logError(String.format("[Stage %s] Ingredient can not be null!", getStage()));
+
+            return this;
+        }
+        if (ZenStager.stagingOverrides.contains(ingredient)) {
+            CraftTweakerAPI.logError(String.format("[Stage %s] Failed to add override for %s as it's already been told to override!", getStage(), ingredient.toString()));
+        }
+        this.stagedEntries.add(new TypeIngredientOverride(ingredient, recipeStage));
+
+        return this;
+    }
+
+    @ZenMethod
+    public Stage addModId(String modId) {
+        if (!Loader.isModLoaded(modId)) {
+            CraftTweakerAPI.logError(String.format("[Stage %s] Failed to add `%s` as the mod is not even loaded?", getStage(), modId));
+
+            return this;
+        }
+        this.stagedEntries.add(new TypeMod(modId));
+
+        return this;
+    }
+
+    @ZenMethod
+    public Stage addModId(String[] modIds) {
+        for (String modId : modIds) {
+            addModId(modId);
         }
 
         return this;
@@ -210,7 +160,7 @@ public class Stage {
     @ZenMethod
     @Method(modid = "dimstages")
     public Stage addDimension(int dimension) {
-        stageType(Types.DIMENSION, Integer.toString(dimension));
+        this.stagedEntries.add(new TypeDimension(dimension));
 
         return this;
     }
@@ -218,7 +168,7 @@ public class Stage {
     @Method(modid = "recipestages")
     @SuppressWarnings("UnusedReturnValue")
     Stage addContainer(String container) {
-        stageType(Types.CONTAINER, container);
+        this.stagedEntries.add(new TypeContainer(container));
 
         return this;
     }
@@ -226,7 +176,7 @@ public class Stage {
     @Method(modid = "recipestages")
     @SuppressWarnings("UnusedReturnValue")
     Stage addPackage(String container) {
-        stageType(Types.PACKAGE, container);
+        this.stagedEntries.add(new TypePackage(container));
 
         return this;
     }
@@ -235,12 +185,11 @@ public class Stage {
     @Method(modid = "recipestages")
     public Stage addRecipeName(String recipeName) {
         if (Helper.validateRecipeName(recipeName) == null) {
-            CraftTweakerAPI.logError(String.format("[Stage %s] Recipe name `%s` is not valid! Example: minecraft:boat", this.getStage(), recipeName));
+            CraftTweakerAPI.logError(String.format("[Stage %s] Recipe name `%s` is not valid! Example: minecraft:boat", getStage(), recipeName));
 
             return this;
         }
-
-        stageType(Types.RECIPE_NAME, recipeName);
+        this.stagedEntries.add(new TypeRecipeName(recipeName));
 
         return this;
     }
@@ -248,12 +197,11 @@ public class Stage {
     @ZenMethod
     @Method(modid = "recipestages")
     public Stage addRecipeRegex(String recipeRegex) {
-        stageType(Types.RECIPE_REGEX, recipeRegex);
+        this.stagedEntries.add(new TypeRecipeName(recipeRegex, true));
 
         return this;
     }
 
-    // TODO: Add IEntity support?
     @ZenMethod
     @Method(modid = "mobstages")
     public Stage addMobs(String[] mobNames) {
@@ -268,7 +216,7 @@ public class Stage {
     @Method(modid = "mobstages")
     @SuppressWarnings("UnusedReturnValue")
     public Stage addMob(String mobName) {
-        stageType(Types.MOB, mobName);
+        this.stagedEntries.add(new TypeMob(mobName));
 
         return this;
     }
@@ -286,8 +234,8 @@ public class Stage {
     @ZenMethod
     @Method(modid = "mobstages")
     @SuppressWarnings("UnusedReturnValue")
-    public Stage addMob(String mobName, int dimension) {
-        stageType(Types.MOB, mobName, Integer.toString(dimension));
+    public Stage addMob(String mobName, int dimensionId) {
+        this.stagedEntries.add(new TypeMob(mobName, dimensionId));
 
         return this;
     }
@@ -306,7 +254,7 @@ public class Stage {
     @Method(modid = "tinkerstages")
     @SuppressWarnings("UnusedReturnValue")
     public Stage addTiCMaterial(String materialName) {
-        stageType(Types.TINKER_MATERIAL, materialName);
+        this.stagedEntries.add(new TypeTinker(TinkerType.MATERIAL, materialName));
 
         return this;
     }
@@ -314,7 +262,7 @@ public class Stage {
     @ZenMethod
     @Method(modid = "tinkerstages")
     public Stage addTiCModifier(String modifierName) {
-        stageType(Types.TINKER_MODIFIER, modifierName);
+        this.stagedEntries.add(new TypeTinker(TinkerType.MODIFIER, modifierName));
 
         return this;
     }
@@ -333,16 +281,7 @@ public class Stage {
     @Method(modid = "tinkerstages")
     @SuppressWarnings("UnusedReturnValue")
     public Stage addTiCToolType(String toolType) {
-        stageType(Types.TINKER_TOOL, toolType);
-
-        return this;
-    }
-
-    @ZenMethod
-    @Method(modid = "multiblockstages")
-    @SuppressWarnings("UnusedReturnValue")
-    public Stage addIEMultiBlock(String multiblock) {
-        stageType(Types.IE_MULTIBLOCK, multiblock);
+        this.stagedEntries.add(new TypeTinker(TinkerType.TOOL, toolType));
 
         return this;
     }
@@ -358,6 +297,15 @@ public class Stage {
     }
 
     @ZenMethod
+    @Method(modid = "multiblockstages")
+    @SuppressWarnings("UnusedReturnValue")
+    public Stage addIEMultiBlock(String multiblock) {
+        this.stagedEntries.add(new TypeMultiBlock(MultiBlockType.IE, multiblock));
+
+        return this;
+    }
+
+    @ZenMethod
     @Method(modid = "orestages")
     public Stage addOreReplacement(IIngredient blockToHide, @Optional(valueBoolean = false) boolean isNonDefaulting) {
         if (blockToHide == null) {
@@ -365,15 +313,10 @@ public class Stage {
 
             return this;
         }
-        if (stagedOres.containsKey(blockToHide)) {
-            CraftTweakerAPI.logError(String.format("[Stage %s] Failed to add the ore `%s` due to already being added.", this.getStage(), blockToHide.toString()));
 
-            return this;
-        }
-        StagedOre stagedOre = new StagedOre(blockToHide);
-        stagedOre.setNonDefaulting(isNonDefaulting);
-
-        stagedOres.put(blockToHide, stagedOre);
+        TypeOre typeOre = new TypeOre(blockToHide);
+        typeOre.setNonDefaulting(isNonDefaulting);
+        this.stagedEntries.add(typeOre);
 
         return this;
     }
@@ -382,131 +325,87 @@ public class Stage {
     @Method(modid = "orestages")
     public Stage addOreReplacement(IIngredient blockToHide, IItemStack blockToShow, @Optional(valueBoolean = false) boolean isNonDefaulting) {
         if (blockToHide == null || blockToShow == null) {
-            CraftTweakerAPI.logError(String.format("[Stage %s] Ore can not be null!", this.getStage()));
+            CraftTweakerAPI.logError(String.format("[Stage %s] Ore can not be null!", getStage()));
 
             return this;
         }
-        if (stagedOres.containsKey(blockToHide)) {
-            CraftTweakerAPI.logError(String.format("[Stage %s] Failed to add the ore `%s` due to already being added.", this.getStage(), blockToHide.toString()));
 
-            return this;
-        }
-        StagedOre stagedOre = new StagedOre(blockToHide, blockToShow);
-        stagedOre.setNonDefaulting(isNonDefaulting);
-
-        stagedOres.put(blockToHide, stagedOre);
+        TypeOre typeOre = new TypeOre(blockToHide, blockToShow);
+        typeOre.setNonDefaulting(isNonDefaulting);
+        this.stagedEntries.add(typeOre);
 
         return this;
     }
 
-    @ZenMethod
-    @SuppressWarnings("UnusedReturnValue")
-    public Stage build() {
+    /**
+     * Build loops over all the entries for things to stage and calls the build method on each other entry.
+     */
+    void build() {
+        List<TypeIngredientOverride> overrideTypes = filterEntries(TypeIngredientOverride.class);
+
         /*
-            IIngredient Staging
+            Build the Overrides to set the IIngredient to the map so the Mod Type knows about the Overrides.
          */
-        for (Map.Entry<IIngredient, StagedIngredient> stagedIngredient : stagedIngredients.entrySet()) {
-            StagedIngredient ingredient = stagedIngredient.getValue();
-            if (ingredient.getIngredient() instanceof ILiquidStack) {
-                ItemStagesCrT.stageLiquid(getStage(), (ILiquidStack) ingredient.getIngredient());
-            } else {
-                ItemStagesCrT.addItemStage(getStage(), ingredient.getIngredient());
-                if (ingredient.shouldStageRecipe()) {
-                    Recipes.setRecipeStage(getStage(), ingredient.getIngredient());
-                }
-            }
+        for (TypeIngredientOverride overrideType : overrideTypes) {
+            overrideType.build(getStage());
         }
 
         /*
-            Ore Staging
+            Build the rest of the Types now that we've handled the Overrides.
          */
-        for (Map.Entry<IIngredient, StagedOre> stagedOreEntry : stagedOres.entrySet()) {
-            StagedOre stagedOre = stagedOreEntry.getValue();
-            if (stagedOre.isNonDefaulting()) {
-                if (stagedOre.getBlockToShow() != null) {
-                    OreTiersCrT.addNonDefaultingReplacement(getStage(), stagedOre.getBlockToHide(), stagedOre.getBlockToShow());
-                } else {
-                    OreTiersCrT.addNonDefaultingReplacement(getStage(), stagedOre.getBlockToHide());
-                }
-            } else {
-                if (stagedOre.getBlockToShow() != null) {
-                    OreTiersCrT.addReplacement(getStage(), stagedOre.getBlockToHide(), stagedOre.getBlockToShow());
-                } else {
-                    OreTiersCrT.addReplacement(getStage(), stagedOre.getBlockToHide());
-                }
+        for (TypeBase newType : stagedEntries) {
+            if (!(newType.getClass().isInstance(TypeIngredient.class))) {
+                newType.build(getStage());
             }
         }
+    }
 
-        /*
-            Custom Type Staging
-         */
-        for (StagedType stagedType : stagedTypes) {
-            switch (stagedType.getType()) {
-                case RECIPE_NAME:
-                    Recipes.setRecipeStage(getStage(), stagedType.getValue());
-                    break;
-                case RECIPE_REGEX:
-                    Recipes.setRecipeStageByRegex(getStage(), stagedType.getValue());
-                    break;
-                case DIMENSION:
-                    DimensionStagesCrT.addDimensionStage(getStage(), Integer.parseInt(stagedType.getValue()));
-                    break;
-                case MOB:
-                    if (stagedType.getSubValue() != null) {
-                        MobStagesCrT.addStage(getStage(), stagedType.getValue(), Integer.parseInt(stagedType.getSubValue()));
-                    } else {
-                        MobStagesCrT.addStage(getStage(), stagedType.getValue());
+    /**
+     * Filter the Staged Entries by the class given.
+     */
+    <T> List<T> filterEntries(Class<T> clazz) {
+        return stagedEntries.stream().filter(clazz::isInstance).map(clazz::cast).collect(Collectors.toList());
+    }
+
+    /**
+     * Return the Stage in that the Value is Staged in.
+     */
+    @SuppressWarnings("unchecked")
+    <T extends TypeBase, R> Stage getStage(Class<T> clazz, R value) {
+        return this.filterEntries(clazz).stream()
+                .filter(t -> t.isStaged(value))
+                .collect(Collectors.toSet())
+                .size() > 0 ? this : null;
+    }
+
+    /**
+     * Get the Stage of what an IIngredient is in.
+     */
+    private Stage getIngredientStage(IIngredient testIngredient) {
+        List<TypeIngredient> stagedIngredients = filterEntries(TypeIngredient.class);
+
+        for (TypeIngredient stagedIngredientEntry : stagedIngredients) {
+            IIngredient ingredient = stagedIngredientEntry.getValue();
+
+            if (testIngredient instanceof MCOreDictEntry) {
+                if (ingredient instanceof MCOreDictEntry) {
+                    if (((MCOreDictEntry) testIngredient).getName().equals(((MCOreDictEntry) ingredient).getName())) {
+                        return this;
                     }
-                    break;
-                case TINKER_MATERIAL:
-                    TinkerStagesCrT.addMaterialStage(getStage(), stagedType.getValue());
-                    break;
-                case TINKER_MODIFIER:
-                    TinkerStagesCrT.addModifierStage(getStage(), stagedType.getValue());
-                    break;
-                case TINKER_TOOL:
-                    TinkerStagesCrT.addToolTypeStage(getStage(), stagedType.getValue());
-                    break;
-                case IE_MULTIBLOCK:
-                    IEMultiBlockStages.addStage(getStage(), stagedType.getValue());
-                    break;
-            }
-        }
-
-        return this;
-    }
-
-    /**
-     * Get the Staged Types by filtering by a Type.
-     */
-    List<StagedType> getStagedTypes(Types type) {
-        return stagedTypes.stream().filter(t -> t.getType() == type).collect(Collectors.toList());
-    }
-
-    /**
-     * Add the Stage Type to the map listing. Also check if that type to stage is not already staged.
-     */
-    private void stageType(Types type, String value) {
-        stageType(type, value, null);
-    }
-    private void stageType(Types type, String value, String subValue) {
-        for (StagedType stagedType : getStagedTypes(type)) {
-            if (stagedType.getValue().equalsIgnoreCase(value)) {
-                CraftTweakerAPI.logError(String.format("[Stage %s] Failed to add the %s `%s` due to already being added.", this.getStage(), type.name(), value));
-
-                return;
-            }
-        }
-
-        stagedTypes.add(new StagedType(value, type, subValue));
-    }
-
-    /**
-     * Check if the Stage Type and the value given is staged in this "Stage".
-     */
-    private Stage getStageFromType(Types type, String value) {
-        for (StagedType stagedDimension : getStagedTypes(type)) {
-            if (stagedDimension.getValue().equalsIgnoreCase(value)) {
+                }
+            } else if (ingredient instanceof MCOreDictEntry) {
+                if (ingredient.contains(testIngredient)) {
+                    return this;
+                }
+            } else if (testIngredient instanceof ILiquidStack) {
+                if (ingredient.matches((ILiquidStack) testIngredient)) {
+                    return this;
+                }
+            } else if (testIngredient instanceof IItemStack) {
+                if (ingredient.matchesExact((IItemStack) testIngredient)) {
+                    return this;
+                }
+            } else if (ingredient.contains(testIngredient)) {
                 return this;
             }
         }
