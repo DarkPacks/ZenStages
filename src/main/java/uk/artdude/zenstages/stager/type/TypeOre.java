@@ -61,4 +61,8 @@ public class TypeOre extends TypeBase<IIngredient> {
     @Override
     public void build(String[] stageNames) {
     }
+
+    @Override
+    public void buildRecipe(String stageName) {
+    }
 }

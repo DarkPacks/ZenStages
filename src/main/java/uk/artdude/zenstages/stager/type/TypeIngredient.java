@@ -3,14 +3,8 @@ package uk.artdude.zenstages.stager.type;
 import com.blamejared.recipestages.handlers.Recipes;
 import crafttweaker.CraftTweakerAPI;
 import crafttweaker.api.item.IIngredient;
-import crafttweaker.api.item.IItemStack;
 import crafttweaker.api.liquid.ILiquidStack;
-import crafttweaker.mc1120.block.MCItemBlock;
-import net.darkhax.bookshelf.util.ModUtils;
-import net.darkhax.bookshelf.util.StackUtils;
 import net.darkhax.itemstages.compat.crt.ItemStagesCrT;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 
 /**
  * Ingredient Type
@@ -58,5 +52,8 @@ public class TypeIngredient extends TypeBase<IIngredient> {
 
     @Override
     public void build(String[] stageNames) {
+    }
+
+    public void buildRecipe(String stageName) {
     }
 }

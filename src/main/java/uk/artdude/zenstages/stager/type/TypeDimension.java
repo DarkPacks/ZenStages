@@ -15,4 +15,8 @@ public class TypeDimension extends TypeBase<Integer> {
     @Override
     public void build(String[] stageNames) {
     }
+
+    @Override
+    public void buildRecipe(String stageName) {
+    }
 }

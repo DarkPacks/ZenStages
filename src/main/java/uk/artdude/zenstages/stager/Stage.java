@@ -16,6 +16,7 @@ import uk.artdude.zenstages.common.util.Helper;
 import uk.artdude.zenstages.stager.type.*;
 import uk.artdude.zenstages.stager.type.enums.MultiBlockType;
 import uk.artdude.zenstages.stager.type.enums.TinkerType;
+import uk.artdude.zenstages.stager.util.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +35,11 @@ public class Stage {
     @ZenGetter("stage")
     public String getStage() {
         return stage;
+    }
+
+    @ZenGetter("recipeRegex")
+    public String getRecipeRegex() {
+        return String.format(Utils.craftTweakerRegex, Utils.formatStage(this), ".*");
     }
 
     List<ILiquidStack> getStagedLiquids() {
@@ -77,6 +83,31 @@ public class Stage {
     @ZenMethod
     public boolean isCustomStaged(String slug, String value) {
         return Helper.getCustomTypeByValue(ZenStager.filterCustomByStage(this, slug), value) != null;
+    }
+
+    @ZenMethod
+    public boolean isCustomStaged(String slug, String[] values) {
+        return Helper.getCustomTypeByValue(ZenStager.filterCustomByStage(this, slug), values) != null;
+    }
+
+    @ZenMethod
+    public boolean isCustomStaged(String slug, int value) {
+        return Helper.getCustomTypeByValue(ZenStager.filterCustomByStage(this, slug), value) != null;
+    }
+
+    @ZenMethod
+    public boolean isCustomStaged(String slug, int[] values) {
+        return Helper.getCustomTypeByValue(ZenStager.filterCustomByStage(this, slug), values) != null;
+    }
+
+    @ZenMethod
+    public boolean isCustomStaged(String slug, IIngredient value) {
+        return Helper.getCustomTypeByValue(ZenStager.filterCustomByStage(this, slug), value) != null;
+    }
+
+    @ZenMethod
+    public boolean isCustomStaged(String slug, IIngredient[] values) {
+        return Helper.getCustomTypeByValue(ZenStager.filterCustomByStage(this, slug), values) != null;
     }
 
     @ZenMethod
@@ -130,6 +161,18 @@ public class Stage {
             return this;
         }
         this.stagedEntries.add(new TypeMod(modId));
+
+        return this;
+    }
+
+    @ZenMethod
+    public Stage addModId(String modId, IIngredient[] ignoreStaging) {
+        if (!Loader.isModLoaded(modId)) {
+            CraftTweakerAPI.logError(String.format("[Stage %s] Failed to add `%s` as the mod is not even loaded?", getStage(), modId));
+
+            return this;
+        }
+        this.stagedEntries.add(new TypeMod(modId, ignoreStaging));
 
         return this;
     }
@@ -197,7 +240,7 @@ public class Stage {
     @ZenMethod
     @Method(modid = "recipestages")
     public Stage addRecipeRegex(String recipeRegex) {
-        this.stagedEntries.add(new TypeRecipeName(recipeRegex, true));
+        this.stagedEntries.add(new TypeRecipeRegex(recipeRegex));
 
         return this;
     }
@@ -337,27 +380,33 @@ public class Stage {
         return this;
     }
 
+    @ZenMethod
+    @Method(modid = "orestages")
+    public Stage addOreReplacement(String original, String replacement) {
+        if (original == null || original.length() < 1 || replacement == null || replacement.length() < 1) {
+            CraftTweakerAPI.logError(String.format("[Stage %s] Ore original or replacement can not be null or empty!", getStage()));
+
+            return this;
+        }
+        this.stagedEntries.add(new TypeOreById(original, replacement));
+
+        return this;
+    }
+
     /**
      * Build loops over all the entries for things to stage and calls the build method on each other entry.
      */
     void build() {
-        List<TypeIngredientOverride> overrideTypes = filterEntries(TypeIngredientOverride.class);
-
-        /*
-            Build the Overrides to set the IIngredient to the map so the Mod Type knows about the Overrides.
-         */
-        for (TypeIngredientOverride overrideType : overrideTypes) {
-            overrideType.build(getStage());
-        }
-
-        /*
-            Build the rest of the Types now that we've handled the Overrides.
-         */
         for (TypeBase newType : stagedEntries) {
-            if (!(newType.getClass().isInstance(TypeIngredient.class))) {
-                newType.build(getStage());
-            }
+            newType.build(getStage());
         }
+    }
+
+    /**
+     * Build loops over all the entries for staging recipes if support by the type.
+     */
+    void buildRecipe() {
+        filterEntries(TypeRecipeRegex.class).forEach(t -> t.buildRecipe(getStage()));
     }
 
     /**

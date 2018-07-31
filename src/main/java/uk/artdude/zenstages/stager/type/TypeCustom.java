@@ -69,11 +69,13 @@ public class TypeCustom<T> extends TypeBase<T> {
 
     @Override
     public void build(String stageName) {
-
     }
 
     @Override
     public void build(String[] stageNames) {
+    }
 
+    @Override
+    public void buildRecipe(String stageName) {
     }
 }

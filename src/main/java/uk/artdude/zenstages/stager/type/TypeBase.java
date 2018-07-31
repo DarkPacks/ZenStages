@@ -27,4 +27,6 @@ public abstract class TypeBase<T> {
     public abstract void build(String stageName);
 
     public abstract void build(String stageNames[]);
+
+    public abstract void buildRecipe(String stageName);
 }

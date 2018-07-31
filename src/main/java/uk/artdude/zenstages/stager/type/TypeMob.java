@@ -15,7 +15,7 @@ public class TypeMob extends TypeBase<String> {
         this.dimensionId = dimensionId;
     }
 
-    public int getDimensionId() {
+    private int getDimensionId() {
         return dimensionId;
     }
 
@@ -30,5 +30,9 @@ public class TypeMob extends TypeBase<String> {
 
     @Override
     public void build(String[] stageNames) {
+    }
+
+    @Override
+    public void buildRecipe(String stageName) {
     }
 }

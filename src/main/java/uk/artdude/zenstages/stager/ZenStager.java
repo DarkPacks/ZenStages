@@ -7,6 +7,7 @@ import crafttweaker.api.item.IIngredient;
 import crafttweaker.api.liquid.ILiquidStack;
 import stanhebben.zenscript.annotations.ZenClass;
 import stanhebben.zenscript.annotations.ZenMethod;
+import uk.artdude.zenstages.common.util.Helper;
 import uk.artdude.zenstages.stager.type.*;
 
 import java.util.*;
@@ -31,15 +32,15 @@ public class ZenStager {
 
             return null;
         }
-        name = name.toLowerCase();
-        if (stageMap.containsKey(name)) {
-            CraftTweakerAPI.logError(String.format("[ZenStager] Failed to create builder for %s due to name already existing.", name));
+        String safeName = Helper.cleanName(name);
+
+        if (stageMap.containsKey(safeName)) {
+            CraftTweakerAPI.logError(String.format("[ZenStager] Failed to create stage %s due to name already existing.", safeName));
 
             return null;
         }
-
-        Stage stage = new Stage(name);
-        stageMap.put(name, stage);
+        Stage stage = new Stage(safeName);
+        stageMap.put(safeName, stage);
 
         return stage;
     }
@@ -92,6 +93,17 @@ public class ZenStager {
         for (Stage stage : stages) {
             stage.addContainer(containerName);
         }
+    }
+
+    @ZenMethod
+    public TypeCustom getCustomType(String name) {
+        for (TypeCustom customType : customTypes) {
+            if (customType.getName().endsWith(name)) {
+                return customType;
+            }
+        }
+
+        return null;
     }
 
     @ZenMethod
@@ -246,13 +258,14 @@ public class ZenStager {
                 return getStageForType(TypeMod.class, value) != null;
             case "multiblock":
                 return getStageForType(TypeMultiBlock.class, value) != null;
-            case "pkg":
             case "package":
                 return getStageForType(TypePackage.class, value) != null;
             case "recipename":
                 return getStageForType(TypeRecipeName.class, value) != null;
             case "tinker":
                 return getStageForType(TypeTinker.class, value) != null;
+            case "mob":
+                return getStageForType(TypeMob.class, value) != null;
         }
 
         return hasCustomType(slug, value);
@@ -261,7 +274,6 @@ public class ZenStager {
     @ZenMethod
     public static boolean isStaged(String slug, int value) {
         switch (slug.toLowerCase()) {
-            case "dim":
             case "dimension":
                 return getStageForType(TypeDimension.class, value) != null;
         }
@@ -272,7 +284,6 @@ public class ZenStager {
     @ZenMethod
     public static boolean isStaged(String slug, IIngredient value) {
         switch (slug.toLowerCase()) {
-            case "ing":
             case "ingredient":
                 return getStageForType(TypeIngredient.class, value) != null;
             case "ore":
@@ -300,12 +311,18 @@ public class ZenStager {
         stagedTypes.put("CONTAINER", new HashMap<>());
         stagedTypes.put("PACKAGE", new HashMap<>());
 
+        // Handle the staging of the Types.
         stageMap.forEach((s, stage) -> {
             getStagesForType(TypeContainer.class, stagedTypes.get("CONTAINER"), stage);
             getStagesForType(TypePackage.class, stagedTypes.get("PACKAGE"), stage);
 
             stage.build();
         });
+
+        // Setting of the Recipe Regex's needs to happen after the fact of items being staged etc...
+        CraftTweakerAPI.logInfo("[ZenStager] Starting building the recipe stage setting...");
+        stageMap.forEach((s, stage) -> stage.buildRecipe());
+        CraftTweakerAPI.logInfo("[ZenStager] Completed building the recipe stage setting!");
 
         // Stage the Containers based on the built stage mapping.
         Map<String, List<String>> stagedContainers = stagedTypes.get("CONTAINER");
@@ -332,7 +349,9 @@ public class ZenStager {
      * Create a Custom Type based on the Args provided.
      */
     private static <T> TypeCustom createCustomType(String name, T value) {
-        TypeCustom<T> customType = new TypeCustom<>(name, value);
+        String safeName = Helper.cleanName(name);
+        CraftTweakerAPI.logInfo(String.format("[ZenStager] Custom Type has been created with the name `%s` use this when accessing a type via the scripts!", safeName));
+        TypeCustom<T> customType = new TypeCustom<>(safeName, value);
         customTypes.add(customType);
 
         return customType;
@@ -379,7 +398,7 @@ public class ZenStager {
                 .collect(Collectors.toList());
     }
 
-    static List<TypeCustom> filterCustomByName(String name) {
+    private static List<TypeCustom> filterCustomByName(String name) {
         return customTypes.stream().filter(t -> t.getName().equalsIgnoreCase(name)).collect(Collectors.toList());
     }
 

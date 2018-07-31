@@ -27,4 +27,8 @@ public class TypeRecipeName extends TypeBase<String> {
     @Override
     public void build(String[] stageNames) {
     }
+
+    @Override
+    public void buildRecipe(String stageName) {
+    }
 }

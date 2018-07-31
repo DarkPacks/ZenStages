@@ -58,4 +58,15 @@ public class Helper {
         Pattern pattern = Pattern.compile("^([a-z-A-Z]\\w+):([a-zA-Z_]*)$");
         return pattern.matcher(name).matches() ? name : null;
     }
+
+    /**
+     * Clean the String name. This is to prevent any possible issues and to keep things clean.
+     */
+    public static String cleanName(String uncleaned) {
+        return uncleaned
+                .replaceAll("[^A-Za-z_\\s]", "")
+                .replaceAll("\\s+", " ")
+                .replaceAll("\\s+", "_")
+                .toLowerCase();
+    }
 }
