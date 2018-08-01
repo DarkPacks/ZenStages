@@ -304,8 +304,19 @@ public class Stage {
 
     @ZenMethod
     @Method(modid = "tinkerstages")
+    @SuppressWarnings("UnusedReturnValue")
     public Stage addTiCModifier(String modifierName) {
         this.stagedEntries.add(new TypeTinker(TinkerType.MODIFIER, modifierName));
+
+        return this;
+    }
+
+    @ZenMethod
+    @Method(modid = "tinkerstages")
+    public Stage addTiCModifier(String modifierNames[]) {
+        for (String modifierName : modifierNames) {
+            addTiCModifier(modifierName);
+        }
 
         return this;
     }
