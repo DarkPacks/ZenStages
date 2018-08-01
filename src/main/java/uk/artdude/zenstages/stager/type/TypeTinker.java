@@ -19,7 +19,7 @@ public class TypeTinker extends TypeBase<String> {
                 TinkerStagesCrT.addMaterialStage(stageName, getValue());
                 break;
             case MODIFIER:
-                TinkerStagesCrT.addToolTypeStage(stageName, getValue());
+                TinkerStagesCrT.addModifierStage(stageName, getValue());
                 break;
             case TOOL:
                 TinkerStagesCrT.addToolTypeStage(stageName, getValue());
