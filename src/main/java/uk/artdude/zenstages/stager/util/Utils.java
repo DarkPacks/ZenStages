@@ -11,7 +11,7 @@ import java.util.UUID;
 @ZenRegister
 @ZenClass("mods.zenstages.Utils")
 public class Utils {
-    public static final String recipeString = "stage_%s_%s";
+    private static final String recipeString = "stage_%s_%s";
     public static final String craftTweakerRegex = String.format("%s:%s", "crafttweaker", recipeString);
 
     @ZenMethod
