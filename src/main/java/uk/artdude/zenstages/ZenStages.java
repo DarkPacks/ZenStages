@@ -4,14 +4,16 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import org.apache.logging.log4j.Logger;
+import uk.artdude.zenstages.common.command.Commands;
 import uk.artdude.zenstages.common.util.References;
 
 @Mod(modid = References.modID, name = References.modName, version = References.modVersion,
         acceptedMinecraftVersions = References.mcVersion, dependencies = References.dependencies,
         updateJSON = References.updateChangelog)
 public class ZenStages {
-    private static Logger logger;
+    public static Logger logger;
 
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
@@ -21,5 +23,10 @@ public class ZenStages {
     @EventHandler
     public void postInit(FMLPostInitializationEvent event) {
         logger.info("Post Loading Completed!");
+    }
+
+    @EventHandler
+    public void onSeverStarting(FMLServerStartingEvent event) {
+        event.registerServerCommand(new Commands());
     }
 }
