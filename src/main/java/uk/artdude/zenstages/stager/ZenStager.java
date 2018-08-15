@@ -392,9 +392,7 @@ public class ZenStager {
 
     static List<TypeCustom> filterCustomByStage(Stage stage, String slug) {
         return customTypes.stream()
-                .filter(t -> t.getStage() == stage)
-                .collect(Collectors.toList()).stream()
-                .filter(k -> k.getName().equalsIgnoreCase(slug))
+                .filter(t -> t.getStage() == stage && t.getName().equalsIgnoreCase(slug))
                 .collect(Collectors.toList());
     }
 

@@ -67,11 +67,13 @@ public class Commands extends CommandBase {
                 switch (identifier.toLowerCase()) {
                     case "giveall":
                         stages.forEach(stage -> GameStageHelper.addStage(playerMP, stage));
+                        GameStageHelper.syncPlayer(playerMP);
 
                         sender.sendMessage(new TextComponentTranslation("commands.zenstages.giveAll.success", Integer.toString(stages.size()), sender.getName()));
                         break;
                     case "removeall":
                         stages.forEach(stage -> GameStageHelper.removeStage(playerMP, stage));
+                        GameStageHelper.syncPlayer(playerMP);
 
                         sender.sendMessage(new TextComponentTranslation("commands.zenstages.removeAll.success", Integer.toString(stages.size()), sender.getName()));
                         break;
