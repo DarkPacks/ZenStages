@@ -154,6 +154,7 @@ public class Stage {
     }
 
     @ZenMethod
+    @SuppressWarnings("UnusedReturnValue")
     public Stage addModId(String modId) {
         if (!Loader.isModLoaded(modId)) {
             CraftTweakerAPI.logError(String.format("[Stage %s] Failed to add `%s` as the mod is not even loaded?", getStage(), modId));
@@ -161,18 +162,6 @@ public class Stage {
             return this;
         }
         this.stagedEntries.add(new TypeMod(modId));
-
-        return this;
-    }
-
-    @ZenMethod
-    public Stage addModId(String modId, IIngredient[] ignoreStaging) {
-        if (!Loader.isModLoaded(modId)) {
-            CraftTweakerAPI.logError(String.format("[Stage %s] Failed to add `%s` as the mod is not even loaded?", getStage(), modId));
-
-            return this;
-        }
-        this.stagedEntries.add(new TypeMod(modId, ignoreStaging));
 
         return this;
     }
