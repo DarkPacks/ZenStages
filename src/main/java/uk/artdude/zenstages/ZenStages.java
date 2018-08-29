@@ -2,7 +2,6 @@ package uk.artdude.zenstages;
 
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
-import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import org.apache.logging.log4j.Logger;
@@ -18,11 +17,6 @@ public class ZenStages {
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
         logger = event.getModLog();
-    }
-
-    @EventHandler
-    public void postInit(FMLPostInitializationEvent event) {
-        logger.info("Post Loading Completed!");
     }
 
     @EventHandler

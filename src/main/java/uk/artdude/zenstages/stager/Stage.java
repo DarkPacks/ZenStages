@@ -398,6 +398,10 @@ public class Stage {
      */
     void build() {
         for (TypeBase newType : stagedEntries) {
+            // These are built else where so don't call the build method.
+            if (newType instanceof TypeRecipeRegex) {
+                continue;
+            }
             newType.build(getStage());
         }
     }
