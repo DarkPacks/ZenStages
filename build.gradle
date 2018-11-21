@@ -36,11 +36,11 @@ dependencies {
     // JEI
     deobfCompile "mezz.jei:jei_1.12.2:4.9.1.187"
     // BookShelf
-    deobfCompile "net.darkhax.bookshelf:Bookshelf-1.12.2:2.3.557"
+    deobfCompile "net.darkhax.bookshelf:Bookshelf-1.12.2:2.3.+"
     // GameStages
-    deobfCompile "net.darkhax.gamestages:GameStages-1.12.2:2.0.103"
+    deobfCompile "net.darkhax.gamestages:GameStages-1.12.2:2.0.+"
     // ItemStages
-    deobfCompile "net.darkhax.itemstages:ItemStages-1.12.2:2.0.35:deobf"
+    deobfCompile "net.darkhax.itemstages:ItemStages-1.12.2:2.0.+:deobf"
     // Dimension Stages
     deobfCompile "net.darkhax.dimstages:DimensionStages-1.12.2:2.0.+"
     // Mob Stages
@@ -58,7 +58,7 @@ dependencies {
 repositories {
     // CraftTweaker
     maven {
-        url 'http://blamejared.com/maven'
+        url 'https://maven.blamejared.com/'
     }
     // JEI
     maven {
