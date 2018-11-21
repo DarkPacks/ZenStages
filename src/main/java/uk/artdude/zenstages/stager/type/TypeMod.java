@@ -20,6 +20,20 @@ public class TypeMod extends TypeBase<String> {
         this.stageRecipesWithItems = stageRecipesWithItems;
     }
 
+    /**
+     * Both true and false for stageRecipesWithItems will result in recipes AND items being staged for the mod ID.
+     * When `stageRecipesWithItems == true`, to keep all the logic within a single loop, Item Staging is done
+     * individually rather than using `ItemStagesCrT.stageModItems(stageName, getValue())`
+     *
+     * When `Recipes.setRecipeStageByMod()` is called (when stageRecipesWithItems == false),
+     * RecipeStages searches the recipes registry for all recipes under the mod specified.
+     *
+     * Alternatively, with `stageRecipesWithItems == true`, the output item is passed to `Recipes.setRecipeStage`
+     * which results in RecipeStages searching for all recipes that output that item.
+     * This causes OTHER MOD's recipes for that item to ALSO get staged.
+     * This is ideal when modifying an item's recipes using CraftTweaker for example
+     * This behaviour is exactly the same as when calling ZenStages' addIngredient method.
+     */
     @Override
     public void build(String stageName) {
         if (!stageRecipesWithItems) {
