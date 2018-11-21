@@ -12,17 +12,17 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 
 public class TypeMod extends TypeBase<String> {
-    private boolean stageRecipeWithItem;
+    private boolean stageRecipesWithItems;
 
-    public TypeMod(String modId, boolean stageRecipeWithItem) {
+    public TypeMod(String modId, boolean stageRecipesWithItems) {
         super(modId);
 
-        this.stageRecipeWithItem = stageRecipeWithItem;
+        this.stageRecipesWithItems = stageRecipesWithItems;
     }
 
     @Override
     public void build(String stageName) {
-        if (!stageRecipeWithItem) {
+        if (!stageRecipesWithItems) {
             ItemStagesCrT.stageModItems(stageName, getValue());
             Recipes.setRecipeStageByMod(stageName, getValue());
             return;

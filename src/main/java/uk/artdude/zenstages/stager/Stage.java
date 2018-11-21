@@ -155,21 +155,21 @@ public class Stage {
 
     @ZenMethod
     @SuppressWarnings("UnusedReturnValue")
-    public Stage addModId(String modId, @Optional(valueBoolean = false) boolean stageRecipeWithItem) {
+    public Stage addModId(String modId, @Optional(valueBoolean = false) boolean stageRecipesWithItems) {
         if (!Loader.isModLoaded(modId)) {
             CraftTweakerAPI.logError(String.format("[Stage %s] Failed to add `%s` as the mod is not even loaded?", getStage(), modId));
 
             return this;
         }
-        this.stagedEntries.add(new TypeMod(modId, stageRecipeWithItem));
+        this.stagedEntries.add(new TypeMod(modId, stageRecipesWithItems));
 
         return this;
     }
 
     @ZenMethod
-    public Stage addModId(String[] modIds, @Optional(valueBoolean = false) boolean stageRecipeWithItem) {
+    public Stage addModId(String[] modIds, @Optional(valueBoolean = false) boolean stageRecipesWithItems) {
         for (String modId : modIds) {
-            addModId(modId, stageRecipeWithItem);
+            addModId(modId, stageRecipesWithItems);
         }
 
         return this;
