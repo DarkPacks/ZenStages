@@ -50,12 +50,13 @@ public class Helper {
     }
 
     public static String validateRecipeName(String name) {
-        Pattern withoutModId = Pattern.compile("^([a-zA-Z_]*)$");
+        String recipeNameRegex = "([a-z-A-Z0-9][\\w\\-/]*)$";
+        Pattern withoutModId = Pattern.compile("^" + recipeNameRegex);
         if (withoutModId.matcher(name).matches()) {
             return String.format("minecraft:%s", name);
         }
 
-        Pattern pattern = Pattern.compile("^([a-z-A-Z]\\w+):([a-zA-Z_]*)$");
+        Pattern pattern = Pattern.compile("^([a-z-A-Z]\\w+):" + recipeNameRegex);
         return pattern.matcher(name).matches() ? name : null;
     }
 
