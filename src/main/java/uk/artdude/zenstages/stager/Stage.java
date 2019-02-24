@@ -155,7 +155,7 @@ public class Stage {
 
     @ZenMethod
     @SuppressWarnings("UnusedReturnValue")
-    public Stage addEnchantment(IEnchantmentDefinition[] enchantmentDefinitions) {
+    public Stage addEnchantments(IEnchantmentDefinition[] enchantmentDefinitions) {
         if (enchantmentDefinitions == null) {
             CraftTweakerAPI.logError(String.format("[Stage %s] Enchantment can not be null!", getStage()));
 
@@ -183,7 +183,7 @@ public class Stage {
 
     @ZenMethod
     @SuppressWarnings("UnusedReturnValue")
-    public Stage addEnchantmentByLevel(IEnchantment[] enchantments) {
+    public Stage addEnchantmentsByLevel(IEnchantment[] enchantments) {
         if (enchantments == null) {
             CraftTweakerAPI.logError(String.format("[Stage %s] Enchantment can not be null!", getStage()));
 
