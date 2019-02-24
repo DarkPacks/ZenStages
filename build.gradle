@@ -40,7 +40,7 @@ dependencies {
     // GameStages
     deobfCompile "net.darkhax.gamestages:GameStages-1.12.2:2.0.+"
     // ItemStages
-    deobfCompile "net.darkhax.itemstages:ItemStages-1.12.2:2.0.+:deobf"
+    //deobfCompile "net.darkhax.itemstages:ItemStages-1.12.2:2.1.+:deobf"
     // Dimension Stages
     deobfCompile "net.darkhax.dimstages:DimensionStages-1.12.2:2.0.+"
     // Mob Stages
