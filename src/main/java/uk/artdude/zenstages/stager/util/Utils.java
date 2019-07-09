@@ -1,5 +1,6 @@
 package uk.artdude.zenstages.stager.util;
 
+import crafttweaker.CraftTweakerAPI;
 import crafttweaker.annotations.ZenRegister;
 import crafttweaker.api.item.IItemStack;
 import stanhebben.zenscript.annotations.ZenClass;
@@ -14,13 +15,19 @@ public class Utils {
     private static final String recipeString = "stage_%s_%s";
     public static final String craftTweakerRegex = String.format("%s:%s", "crafttweaker", recipeString);
 
+    @Deprecated
     @ZenMethod
     public static String genRecipeName() {
+        CraftTweakerAPI.logError("genRecipeName() is now deprecated. Please use one of the other alternatives. Will be removed in 0.5.x");
+
         return UUID.randomUUID().toString();
     }
 
+    @Deprecated
     @ZenMethod
     public static String genRecipeName(Stage stage) {
+        CraftTweakerAPI.logError("genRecipeName(Stage stage) is now deprecated. Please use one of the other alternatives. Will be removed in 0.5.x");
+
         return String.format(recipeString, formatStage(stage), UUID.randomUUID().toString());
     }
 
