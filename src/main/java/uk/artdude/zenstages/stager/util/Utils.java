@@ -52,7 +52,7 @@ public class Utils {
     }
 
     private static String formatItem(IItemStack itemStack) {
-        return itemStack.getDisplayName()
+        return itemStack.getName()
                 .replaceAll("\\s+", "_")
                 .replaceAll("[()]", "")
                 .toLowerCase();
