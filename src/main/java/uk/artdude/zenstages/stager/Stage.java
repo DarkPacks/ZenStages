@@ -2,6 +2,8 @@ package uk.artdude.zenstages.stager;
 
 import crafttweaker.CraftTweakerAPI;
 import crafttweaker.annotations.ZenRegister;
+import crafttweaker.api.enchantments.IEnchantment;
+import crafttweaker.api.enchantments.IEnchantmentDefinition;
 import crafttweaker.api.item.IIngredient;
 import crafttweaker.api.item.IItemStack;
 import crafttweaker.api.liquid.ILiquidStack;
@@ -133,6 +135,62 @@ public class Stage {
         }
         for (IIngredient ingredient : ingredients) {
             addIngredient(ingredient, recipeStage);
+        }
+
+        return this;
+    }
+
+    @ZenMethod
+    @SuppressWarnings("UnusedReturnValue")
+    public Stage addEnchantment(IEnchantmentDefinition enchantmentDefinition) {
+        if (enchantmentDefinition == null) {
+            CraftTweakerAPI.logError(String.format("[Stage %s] EnchantmentDefinition can not be null!", getStage()));
+
+            return this;
+        }
+        this.stagedEntries.add(new TypeEnchantmentDefinition(enchantmentDefinition));
+
+        return this;
+    }
+
+    @ZenMethod
+    @SuppressWarnings("UnusedReturnValue")
+    public Stage addEnchantments(IEnchantmentDefinition[] enchantmentDefinitions) {
+        if (enchantmentDefinitions == null) {
+            CraftTweakerAPI.logError(String.format("[Stage %s] Enchantment can not be null!", getStage()));
+
+            return this;
+        }
+        for (IEnchantmentDefinition enchantmentDefinition : enchantmentDefinitions) {
+            addEnchantment(enchantmentDefinition);
+        }
+
+        return this;
+    }
+
+    @ZenMethod
+    @SuppressWarnings("UnusedReturnValue")
+    public Stage addEnchantmentByLevel(IEnchantment enchantment) {
+        if (enchantment == null) {
+            CraftTweakerAPI.logError(String.format("[Stage %s] Enchantment can not be null!", getStage()));
+
+            return this;
+        }
+        this.stagedEntries.add(new TypeEnchantment(enchantment));
+
+        return this;
+    }
+
+    @ZenMethod
+    @SuppressWarnings("UnusedReturnValue")
+    public Stage addEnchantmentsByLevel(IEnchantment[] enchantments) {
+        if (enchantments == null) {
+            CraftTweakerAPI.logError(String.format("[Stage %s] Enchantment can not be null!", getStage()));
+
+            return this;
+        }
+        for (IEnchantment enchantment : enchantments) {
+            addEnchantmentByLevel(enchantment);
         }
 
         return this;
