@@ -4,7 +4,9 @@ import com.blamejared.recipestages.handlers.Recipes;
 import crafttweaker.CraftTweakerAPI;
 import crafttweaker.annotations.ZenRegister;
 import crafttweaker.api.item.IIngredient;
+import crafttweaker.api.item.IItemStack;
 import crafttweaker.api.liquid.ILiquidStack;
+import net.minecraft.util.ResourceLocation;
 import stanhebben.zenscript.annotations.ZenClass;
 import stanhebben.zenscript.annotations.ZenMethod;
 import uk.artdude.zenstages.common.util.Helper;
@@ -24,6 +26,8 @@ public class ZenStager {
         to prevent staging of that IIngredient.
     */
     public static List<IIngredient> stagingOverrides = new ArrayList<>();
+
+    public static Map<String, Set<ResourceLocation>> modItemOverrides = new HashMap<>();
 
     @ZenMethod
     public static Stage initStage(String name) {
@@ -92,6 +96,26 @@ public class ZenStager {
     public static void addContainer(String containerName, Stage[] stages) {
         for (Stage stage : stages) {
             stage.addContainer(containerName);
+        }
+    }
+
+    @ZenMethod
+    public static void addModItemOverrides(String modId, IIngredient... overrides) {
+        if (getStageForType(TypeMod.class, modId) == null) {
+            CraftTweakerAPI.logError(String.format("Failed to add item overrides for `%s` as the mod ID has not been staged", modId));
+            return;
+        }
+
+        if (!modItemOverrides.containsKey(modId)) {
+            modItemOverrides.put(modId, new HashSet<>());
+        }
+
+        Set<ResourceLocation> modSpecificItemOverrides = modItemOverrides.get(modId);
+
+        for (IIngredient override : overrides) {
+            for (IItemStack item : override.getItems()) {
+                modSpecificItemOverrides.add(new ResourceLocation(item.getDefinition().getId()));
+            }
         }
     }
 

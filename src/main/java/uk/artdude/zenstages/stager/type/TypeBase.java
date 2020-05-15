@@ -1,7 +1,7 @@
 package uk.artdude.zenstages.stager.type;
 
 public abstract class TypeBase<T> {
-    private T value;
+    protected T value;
 
     TypeBase(T value) {
         this.value = value;

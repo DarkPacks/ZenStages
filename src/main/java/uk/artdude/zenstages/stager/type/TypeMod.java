@@ -13,6 +13,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
+import uk.artdude.zenstages.stager.ZenStager;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -61,6 +62,8 @@ public class TypeMod extends TypeBase<String> {
         for (final Item item : ModUtils.getSortedEntries(ForgeRegistries.ITEMS).get(getValue())) {
             if (item != null && item != Items.AIR) {
                 if (!this.overrides.isEmpty() && this.overrides.contains(item.getRegistryName())) continue;
+                if (ZenStager.modItemOverrides.containsKey(this.value) && !ZenStager.modItemOverrides.get(this.value).isEmpty() &&
+                        ZenStager.modItemOverrides.get(this.value).contains(item.getRegistryName())) continue;
                 // Stage Item
                 CraftTweakerAPI.apply(new ActionAddItemRestriction(stageName, item));
 
