@@ -31,7 +31,7 @@ public class TypeIngredient extends TypeBase<IIngredient> {
 
     @Override
     public boolean isStaged(IIngredient toCompare) {
-        return false;
+        return toCompare.getItems().stream().anyMatch(item -> value.matches(item));
     }
 
     @Override

@@ -70,6 +70,10 @@ public class Stage {
         return getStage(TypeMob.class, mobName);
     }
 
+    Stage getModStage(String modId) {
+        return getStage(TypeMod.class, modId);
+    }
+
     Stage getTiCMaterialStage(String material) {
         return getStage(TypeTinker.class, material);
     }

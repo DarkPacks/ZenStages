@@ -242,6 +242,17 @@ public class ZenStager {
     }
 
     @ZenMethod
+    public static Stage getModStage(String modId) {
+        for (Stage stage : stageMap.values()) {
+            if (stage.getModStage(modId) != null) {
+                return stage;
+            }
+        }
+
+        return null;
+    }
+
+    @ZenMethod
     public static Stage getTiCMaterialStage(String material) {
         for (Stage stage : stageMap.values()) {
             if (stage.getTiCMaterialStage(material) != null) {
