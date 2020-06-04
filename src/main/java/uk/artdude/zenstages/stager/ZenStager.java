@@ -1,6 +1,7 @@
 package uk.artdude.zenstages.stager;
 
 import com.blamejared.recipestages.handlers.Recipes;
+import com.google.common.collect.Lists;
 import crafttweaker.CraftTweakerAPI;
 import crafttweaker.annotations.ZenRegister;
 import crafttweaker.api.item.IIngredient;
@@ -27,7 +28,7 @@ public class ZenStager {
     */
     public static List<IIngredient> stagingOverrides = new ArrayList<>();
 
-    public static Map<String, Set<ResourceLocation>> modItemOverrides = new HashMap<>();
+    public static Map<String, Map<ResourceLocation, List<IItemStack>>> modItemOverrides = new HashMap<>();
 
     @ZenMethod
     public static Stage initStage(String name) {
@@ -107,14 +108,18 @@ public class ZenStager {
         }
 
         if (!modItemOverrides.containsKey(modId)) {
-            modItemOverrides.put(modId, new HashSet<>());
+            modItemOverrides.put(modId, new HashMap<>());
         }
 
-        Set<ResourceLocation> modSpecificItemOverrides = modItemOverrides.get(modId);
+        Map<ResourceLocation, List<IItemStack>> modSpecificItemOverrides = modItemOverrides.get(modId);
 
         for (IIngredient override : overrides) {
             for (IItemStack item : override.getItems()) {
-                modSpecificItemOverrides.add(new ResourceLocation(item.getDefinition().getId()));
+                ResourceLocation resourceLocation = new ResourceLocation(item.getDefinition().getId());
+                if (modSpecificItemOverrides.containsKey(resourceLocation))
+                    modSpecificItemOverrides.get(resourceLocation).add(item);
+                else
+                    modSpecificItemOverrides.put(resourceLocation, Lists.newArrayList(item));
             }
         }
     }

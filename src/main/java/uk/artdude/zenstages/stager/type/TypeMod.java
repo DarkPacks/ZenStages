@@ -1,6 +1,7 @@
 package uk.artdude.zenstages.stager.type;
 
 import com.blamejared.recipestages.handlers.Recipes;
+import com.google.common.collect.Lists;
 import crafttweaker.CraftTweakerAPI;
 import crafttweaker.api.item.IIngredient;
 import crafttweaker.api.item.IItemStack;
@@ -15,23 +16,27 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import uk.artdude.zenstages.stager.ZenStager;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class TypeMod extends TypeBase<String> {
     private boolean stageRecipesWithItems;
-    private Set<ResourceLocation> overrides;
+    private Map<ResourceLocation, List<IItemStack>> overrides;
 
     public TypeMod(String modId, boolean stageRecipesWithItems, IIngredient... overrides) {
         super(modId);
 
-        this.overrides = new HashSet<>();
+        this.overrides = new HashMap<>();
 
         for (IIngredient override : overrides) {
             for (IItemStack item : override.getItems()) {
-                this.overrides.add(new ResourceLocation(item.getDefinition().getId()));
+                ResourceLocation resourceLocation = new ResourceLocation(item.getDefinition().getId());
+                if (this.overrides.containsKey(resourceLocation))
+                    this.overrides.get(resourceLocation).add(item);
+                else
+                    this.overrides.put(resourceLocation, Lists.newArrayList(item));
             }
-
         }
 
         this.stageRecipesWithItems = stageRecipesWithItems;
@@ -53,22 +58,24 @@ public class TypeMod extends TypeBase<String> {
      */
     @Override
     public void build(String stageName) {
-        if (!stageRecipesWithItems) {
-            ItemStagesCrT.stageModItems(stageName, getValue());
-            Recipes.setRecipeStageByMod(stageName, getValue());
-            return;
-        }
-
         for (final Item item : ModUtils.getSortedEntries(ForgeRegistries.ITEMS).get(getValue())) {
             if (item != null && item != Items.AIR) {
-                if (!this.overrides.isEmpty() && this.overrides.contains(item.getRegistryName())) continue;
-                if (ZenStager.modItemOverrides.containsKey(this.value) && !ZenStager.modItemOverrides.get(this.value).isEmpty() &&
-                        ZenStager.modItemOverrides.get(this.value).contains(item.getRegistryName())) continue;
+                if (this.overrides.containsKey(item.getRegistryName())
+                        && this.overrides.get(item.getRegistryName()).stream().anyMatch(iItemStack -> iItemStack.matches(MCItemStack.createNonCopy(new ItemStack(item))))
+                ) continue;
+
+                if (
+                        ZenStager.modItemOverrides.containsKey(getValue())
+                        && ZenStager.modItemOverrides.get(getValue()).containsKey(item.getRegistryName())
+                        && ZenStager.modItemOverrides.get(getValue()).get(item.getRegistryName()).stream().anyMatch(iItemStack -> iItemStack.matches(MCItemStack.createNonCopy(new ItemStack(item))))
+                ) continue;
+
                 // Stage Item
                 CraftTweakerAPI.apply(new ActionAddItemRestriction(stageName, item));
 
                 // Stage Item's recipes
-                Recipes.setRecipeStage(stageName, MCItemStack.createNonCopy(new ItemStack(item)));
+                if (stageRecipesWithItems)
+                    Recipes.setRecipeStage(stageName, MCItemStack.createNonCopy(new ItemStack(item)));
             }
         }
     }
