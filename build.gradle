@@ -34,25 +34,26 @@ dependencies {
     // CraftTweaker
     deobfCompile "CraftTweaker2:CraftTweaker2-MC1120-Main:1.12-4.1.+"
     // JEI
-    deobfCompile "mezz.jei:jei_1.12.2:4.9.1.187"
+    deobfCompile "mezz.jei:jei_1.12.2:4.14.4.267"
     // BookShelf
     deobfCompile "net.darkhax.bookshelf:Bookshelf-1.12.2:2.3.+"
     // GameStages
-    deobfCompile "net.darkhax.gamestages:GameStages-1.12.2:2.0.+"
+    compile "net.darkhax.gamestages:GameStages-1.12.2:2.0.+:deobf"
     // ItemStages
-    deobfCompile "net.darkhax.itemstages:ItemStages-1.12.2:2.0.+:deobf"
+    compile "net.darkhax.itemstages:ItemStages-1.12.2:2.0.+:deobf"
     // Dimension Stages
-    deobfCompile "net.darkhax.dimstages:DimensionStages-1.12.2:2.0.+"
+    compile "net.darkhax.dimstages:DimensionStages-1.12.2:2.0.+:deobf"
     // Mob Stages
-    deobfCompile "net.darkhax.mobstages:MobStages-1.12.2:2.0.+"
+    compile "net.darkhax.mobstages:MobStages-1.12.2:2.0.+:deobf"
     // Tinker Stages
-    deobfCompile "net.darkhax.tinkerstages:TinkerStages-1.12.2:2.0.+"
+    compile "net.darkhax.tinkerstages:TinkerStages-1.12.2:2.0.+:deobf"
     // Ore Stages
-    deobfCompile "net.darkhax.orestages:OreStages-1.12.2:2.0.+"
-    // BookShelf
-    deobfCompile "net.darkhax.bookshelf:Bookshelf-1.12.2:2.3.+"
+    compile "net.darkhax.orestages:OreStages-1.12.2:2.0.+:deobf"
     // Multi Block Stages
     deobfCompile "com.teamacronymcoders:multiblockstages:1.2.+"
+    // Tinkers Construct
+    deobfCompile "slimeknights.mantle:Mantle:1.12-1.3.1.22"
+    deobfCompile "slimeknights:TConstruct:1.12-2.7.3.30"
 }
 
 repositories {
@@ -62,7 +63,7 @@ repositories {
     }
     // JEI
     maven {
-        url 'http://dvs1.progwml6.com/files/maven'
+        url 'https://dvs1.progwml6.com/files/maven'
     }
 	// MultiBlock Stages
     maven {
