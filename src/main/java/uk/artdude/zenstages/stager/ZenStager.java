@@ -1,10 +1,13 @@
 package uk.artdude.zenstages.stager;
 
 import com.blamejared.recipestages.handlers.Recipes;
+import com.google.common.collect.Lists;
 import crafttweaker.CraftTweakerAPI;
 import crafttweaker.annotations.ZenRegister;
 import crafttweaker.api.item.IIngredient;
+import crafttweaker.api.item.IItemStack;
 import crafttweaker.api.liquid.ILiquidStack;
+import net.minecraft.util.ResourceLocation;
 import stanhebben.zenscript.annotations.ZenClass;
 import stanhebben.zenscript.annotations.ZenMethod;
 import uk.artdude.zenstages.common.util.Helper;
@@ -24,6 +27,8 @@ public class ZenStager {
         to prevent staging of that IIngredient.
     */
     public static List<IIngredient> stagingOverrides = new ArrayList<>();
+
+    public static Map<String, Map<ResourceLocation, List<IItemStack>>> modItemOverrides = new HashMap<>();
 
     @ZenMethod
     public static Stage initStage(String name) {
@@ -92,6 +97,30 @@ public class ZenStager {
     public static void addContainer(String containerName, Stage[] stages) {
         for (Stage stage : stages) {
             stage.addContainer(containerName);
+        }
+    }
+
+    @ZenMethod
+    public static void addModItemOverrides(String modId, IIngredient... overrides) {
+        if (getStageForType(TypeMod.class, modId) == null) {
+            CraftTweakerAPI.logError(String.format("Failed to add item overrides for `%s` as the mod ID has not been staged", modId));
+            return;
+        }
+
+        if (!modItemOverrides.containsKey(modId)) {
+            modItemOverrides.put(modId, new HashMap<>());
+        }
+
+        Map<ResourceLocation, List<IItemStack>> modSpecificItemOverrides = modItemOverrides.get(modId);
+
+        for (IIngredient override : overrides) {
+            for (IItemStack item : override.getItems()) {
+                ResourceLocation resourceLocation = new ResourceLocation(item.getDefinition().getId());
+                if (modSpecificItemOverrides.containsKey(resourceLocation))
+                    modSpecificItemOverrides.get(resourceLocation).add(item);
+                else
+                    modSpecificItemOverrides.put(resourceLocation, Lists.newArrayList(item));
+            }
         }
     }
 
@@ -205,6 +234,17 @@ public class ZenStager {
     public static Stage getMobStage(String mobName) {
         for (Stage stage : stageMap.values()) {
             if (stage.getMobStage(mobName) != null) {
+                return stage;
+            }
+        }
+
+        return null;
+    }
+
+    @ZenMethod
+    public static Stage getModStage(String modId) {
+        for (Stage stage : stageMap.values()) {
+            if (stage.getModStage(modId) != null) {
                 return stage;
             }
         }

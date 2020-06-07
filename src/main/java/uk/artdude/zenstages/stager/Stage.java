@@ -70,6 +70,10 @@ public class Stage {
         return getStage(TypeMob.class, mobName);
     }
 
+    Stage getModStage(String modId) {
+        return getStage(TypeMod.class, modId);
+    }
+
     Stage getTiCMaterialStage(String material) {
         return getStage(TypeTinker.class, material);
     }
@@ -213,13 +217,13 @@ public class Stage {
 
     @ZenMethod
     @SuppressWarnings("UnusedReturnValue")
-    public Stage addModId(String modId, @Optional(valueBoolean = false) boolean stageRecipesWithItems) {
+    public Stage addModId(String modId, @Optional(valueBoolean = false) boolean stageRecipesWithItems, @Optional IIngredient... overrides) {
         if (!Loader.isModLoaded(modId)) {
             CraftTweakerAPI.logError(String.format("[Stage %s] Failed to add `%s` as the mod is not even loaded?", getStage(), modId));
 
             return this;
         }
-        this.stagedEntries.add(new TypeMod(modId, stageRecipesWithItems));
+        this.stagedEntries.add(new TypeMod(modId, stageRecipesWithItems, overrides));
 
         return this;
     }

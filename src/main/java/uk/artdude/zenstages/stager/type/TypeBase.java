@@ -1,7 +1,7 @@
 package uk.artdude.zenstages.stager.type;
 
 public abstract class TypeBase<T> {
-    private T value;
+    protected T value;
 
     TypeBase(T value) {
         this.value = value;
@@ -18,7 +18,7 @@ public abstract class TypeBase<T> {
      * Checks if the value passed is "staged" or set to the Class value.
      */
     public boolean isStaged(T toCompare) {
-        return value == toCompare;
+        return value.equals(toCompare);
     }
 
     /**
